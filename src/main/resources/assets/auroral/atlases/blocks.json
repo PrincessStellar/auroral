@@ -1,0 +1,8 @@
+{
+  "sources": [
+    {
+      "type": "single",
+      "resource": "auroral:container/slot/cold_brewing_fuel"
+    }
+  ]
+}

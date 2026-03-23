@@ -55,8 +55,6 @@ configurations {
 }
 
 repositories {
-    mavenLocal()
-
     maven {
         name = "Jared's Maven"
         url = "https://maven.blamejared.com/"
@@ -136,7 +134,14 @@ publishing {
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            name = "BreakInBlocks"
+            url = version.toString().endsWith("-SNAPSHOT") ?
+                "https://maven.breakinblocks.com/snapshots" :
+                "https://maven.breakinblocks.com/releases"
+            credentials {
+                username = System.getenv("MAVEN_USER") ?: ""
+                password = System.getenv("MAVEN_TOKEN") ?: ""
+            }
         }
     }
 }

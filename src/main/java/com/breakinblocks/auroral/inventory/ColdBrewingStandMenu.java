@@ -36,11 +36,6 @@ public class ColdBrewingStandMenu extends AbstractContainerMenu {
      */
     public static final ResourceLocation EMPTY_SLOT_FUEL = Auroral.id("container/slot/cold_brewing_fuel");
 
-    /**
-     * Potion slot sprite - same as vanilla.
-     */
-    static final ResourceLocation EMPTY_SLOT_POTION = ResourceLocation.withDefaultNamespace("container/slot/potion");
-
     private static final int BOTTLE_SLOT_START = 0;
     private static final int BOTTLE_SLOT_END = 2;
     private static final int INGREDIENT_SLOT = 3;
@@ -251,11 +246,6 @@ public class ColdBrewingStandMenu extends AbstractContainerMenu {
 
         public static boolean mayPlaceItem(PotionBrewing potionBrewing, ItemStack stack) {
             return potionBrewing.isInput(stack) || stack.is(Items.GLASS_BOTTLE);
-        }
-
-        @Override
-        public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
-            return Pair.of(InventoryMenu.BLOCK_ATLAS, EMPTY_SLOT_POTION);
         }
     }
 }
