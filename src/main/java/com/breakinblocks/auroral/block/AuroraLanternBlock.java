@@ -19,25 +19,11 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.redstone.Orientation;
 
-/**
- * Aurora Lantern - A decorative light source that captures and emits aurora light.
- *
- * This enchanting lantern glows with the ethereal colors of the aurora,
- * providing both light and ambient shimmer particles. Can be placed
- * standing or hanging from chains/other blocks.
- */
 public class AuroraLanternBlock extends Block {
 
     public static final BooleanProperty HANGING = BlockStateProperties.HANGING;
 
-    /**
-     * Shape when standing on ground.
-     */
     private static final VoxelShape STANDING_SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 9.0, 11.0);
-
-    /**
-     * Shape when hanging from above.
-     */
     private static final VoxelShape HANGING_SHAPE = Block.box(5.0, 2.0, 5.0, 11.0, 11.0, 11.0);
 
     public AuroraLanternBlock(Properties properties) {
@@ -52,7 +38,6 @@ public class AuroraLanternBlock extends Block {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        // Check if there's a block above to hang from
         for (Direction direction : context.getNearestLookingDirections()) {
             if (direction == Direction.UP) {
                 BlockPos above = context.getClickedPos().above();
@@ -65,9 +50,6 @@ public class AuroraLanternBlock extends Block {
         return this.defaultBlockState().setValue(HANGING, false);
     }
 
-    /**
-     * Check if the lantern can hang from a given block state.
-     */
     private static boolean canHangFrom(BlockState state, LevelReader level, BlockPos pos) {
         return state.isFaceSturdy(level, pos, Direction.DOWN) ||
                state.is(Blocks.IRON_BARS);
@@ -81,12 +63,10 @@ public class AuroraLanternBlock extends Block {
     @Override
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         if (state.getValue(HANGING)) {
-            // Hanging lanterns need a block above
             BlockPos above = pos.above();
             BlockState aboveState = level.getBlockState(above);
             return canHangFrom(aboveState, level, above);
         } else {
-            // Standing lanterns need a solid surface below
             BlockPos below = pos.below();
             return level.getBlockState(below).isFaceSturdy(level, below, Direction.UP);
         }
@@ -95,7 +75,6 @@ public class AuroraLanternBlock extends Block {
     @Override
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock,
                                    Orientation orientation, boolean movedByPiston) {
-        // Check if the supporting block was removed
         if (!state.canSurvive(level, pos)) {
             level.destroyBlock(pos, true);
         }
@@ -103,19 +82,16 @@ public class AuroraLanternBlock extends Block {
 
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
-        // Spawn shimmer particles for ambient glow effect
         if (random.nextFloat() < 0.3f) {
             double x = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.4;
             double y = pos.getY() + (state.getValue(HANGING) ? 0.6 : 0.5);
             double z = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.4;
 
-            // Small upward drift
             double vy = 0.02 + random.nextDouble() * 0.02;
 
             level.addParticle(ModParticles.SHIMMER.get(), x, y, z, 0, vy, 0);
         }
 
-        // Occasional aurora sparkle
         if (random.nextFloat() < 0.1f) {
             double x = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.3;
             double y = pos.getY() + (state.getValue(HANGING) ? 0.7 : 0.6);

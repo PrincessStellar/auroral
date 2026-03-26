@@ -36,14 +36,9 @@ public class ShimmeringIceBlock extends HalfTransparentBlock {
 
     @Override
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        // Shimmering Ice never melts - override ice behavior
-        // No call to super.randomTick() to prevent melting
+        // Intentionally empty - Shimmering Ice never melts
     }
 
-    /**
-     * Shimmering Ice hydrates farmland like water does.
-     * This is checked by farmland blocks looking for water sources.
-     */
     public static boolean canHydrate(BlockState state, BlockGetter level, BlockPos pos) {
         return true;
     }
@@ -53,9 +48,6 @@ public class ShimmeringIceBlock extends HalfTransparentBlock {
         return adjacentState.is(this) || super.skipRendering(state, adjacentState, direction);
     }
 
-    /**
-     * Check if a position is next to Shimmering Ice or Glowing Shimmer Ice (for farmland hydration).
-     */
     public static boolean isNearShimmeringIce(LevelReader level, BlockPos farmlandPos) {
         for (BlockPos checkPos : BlockPos.betweenClosed(
             farmlandPos.offset(-4, 0, -4),

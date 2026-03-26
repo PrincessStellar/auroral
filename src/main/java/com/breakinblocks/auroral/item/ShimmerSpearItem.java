@@ -99,9 +99,7 @@ public class ShimmerSpearItem extends Item implements ProjectileItem {
         if (level instanceof ServerLevel serverLevel) {
             stack.hurtWithoutBreaking(1, player);
 
-            // Check if Aurora Dash should trigger (in cold biome during aurora)
             if (auroraActive && inColdBiome) {
-                // Aurora Dash - propel the player forward
                 float yaw = player.getYRot();
                 float pitch = player.getXRot();
                 float dashStrength = 1.8F;
@@ -124,7 +122,6 @@ public class ShimmerSpearItem extends Item implements ProjectileItem {
                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RIPTIDE_3.value(), SoundSource.PLAYERS, 1.0F, 1.2F);
                 return true;
             } else {
-                // Regular throw
                 ItemStack projectileStack = stack.consumeAndReturn(1, player);
                 float shootPower = auroraActive ? AURORA_SHOOT_POWER : PROJECTILE_SHOOT_POWER;
 
@@ -165,7 +162,7 @@ public class ShimmerSpearItem extends Item implements ProjectileItem {
     }
 
     @Override
-    public boolean canPerformAction(ItemStack stack, net.neoforged.neoforge.common.ItemAbility itemAbility) {
+    public boolean canPerformAction(net.minecraft.world.item.ItemInstance stack, net.neoforged.neoforge.common.ItemAbility itemAbility) {
         return net.neoforged.neoforge.common.ItemAbilities.DEFAULT_TRIDENT_ACTIONS.contains(itemAbility);
     }
 }

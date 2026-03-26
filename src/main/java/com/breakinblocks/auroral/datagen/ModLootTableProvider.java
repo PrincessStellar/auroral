@@ -40,10 +40,6 @@ public class ModLootTableProvider extends LootTableProvider {
         ), registries);
     }
 
-    @Override
-    protected void validate(WritableRegistry<LootTable> writableregistry, ValidationContext validationcontext, ProblemReporter.Collector collector) {
-        // Skip validation - we handle this ourselves
-    }
 
     /**
      * Block loot table sub-provider.

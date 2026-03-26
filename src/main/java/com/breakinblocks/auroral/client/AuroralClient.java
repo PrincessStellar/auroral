@@ -24,20 +24,10 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
-/**
- * Client-side initialization and event handling.
- */
 @EventBusSubscriber(modid = Auroral.MOD_ID, value = Dist.CLIENT)
 public class AuroralClient {
 
-    /**
-     * Initialize client-side systems.
-     * Called from main mod class during construction.
-     *
-     * @param eventBus The mod event bus
-     */
     public static void init(IEventBus eventBus) {
-        // Register client-specific event listeners on the MOD bus
         eventBus.addListener(AuroralClient::registerLayerDefinitions);
         eventBus.addListener(AuroralClient::registerRenderers);
         eventBus.addListener(AuroralClient::registerParticleProviders);
@@ -46,16 +36,10 @@ public class AuroralClient {
         Auroral.LOGGER.debug("Auroral client initialized");
     }
 
-    /**
-     * Register model layer definitions.
-     */
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(AuroralNautilusModel.LAYER_LOCATION, AuroralNautilusModel::createBodyLayer);
     }
 
-    /**
-     * Register entity renderers.
-     */
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.AURORAL_NAUTILUS.get(), AuroralNautilusRenderer::new);
         event.registerEntityRenderer(ModEntities.THROWN_SHIMMER_SPEAR.get(), ThrownShimmerSpearRenderer::new);
@@ -63,9 +47,6 @@ public class AuroralClient {
         event.registerEntityRenderer(ModEntities.AURORAL_SNOWLETTE.get(), AuroralSnowletteRenderer::new);
     }
 
-    /**
-     * Register particle providers for custom particles.
-     */
     public static void registerParticleProviders(RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(ModParticles.AURORA_SPARKLE.get(), AuroraSparkleParticle.Provider::new);
         event.registerSpriteSet(ModParticles.BASIN_INFUSE.get(), ShimmerParticle.BasinInfuseProvider::new);
@@ -74,24 +55,15 @@ public class AuroralClient {
         event.registerSpriteSet(ModParticles.SHIMMER.get(), ShimmerParticle.ShimmerProvider::new);
     }
 
-    /**
-     * Register menu screens for custom menus.
-     */
     public static void registerMenuScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenuTypes.COLD_BREWING_STAND.get(), ColdBrewingStandScreen::new);
     }
 
-    /**
-     * Reset client state when disconnecting from server.
-     * Releases GPU resources and clears cached state.
-     */
     @SubscribeEvent
     public static void onClientDisconnect(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientAuroraState.reset();
         SnowFootprintManager.clear();
         AuroraMusicHandler.forceStop();
-
-        // Release GPU resources
         SnowFootprintRenderer.dispose();
         AuroraSkyRenderer.dispose();
     }

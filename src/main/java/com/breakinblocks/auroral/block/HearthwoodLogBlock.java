@@ -99,7 +99,6 @@ public class HearthwoodLogBlock extends BaseEntityBlock {
             return;
         }
 
-        // Fire crackling sound
         if (random.nextInt(24) == 0) {
             level.playLocalSound(
                 pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
@@ -108,7 +107,6 @@ public class HearthwoodLogBlock extends BaseEntityBlock {
             );
         }
 
-        // Fire particles
         for (int i = 0; i < 3; i++) {
             double x = pos.getX() + 0.25 + random.nextDouble() * 0.5;
             double y = pos.getY() + 0.5 + random.nextDouble() * 0.3;
@@ -117,7 +115,6 @@ public class HearthwoodLogBlock extends BaseEntityBlock {
             level.addParticle(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 0.0, 0.02, 0.0);
         }
 
-        // Frost particles (instead of smoke for magical cold fire)
         if (random.nextInt(3) == 0) {
             double x = pos.getX() + 0.25 + random.nextDouble() * 0.5;
             double y = pos.getY() + 0.6;
@@ -125,7 +122,6 @@ public class HearthwoodLogBlock extends BaseEntityBlock {
             level.addParticle(ModParticles.FROST.get(), x, y, z, 0.0, 0.05, 0.0);
         }
 
-        // Occasional sparkle particles (cozy touch)
         if (random.nextInt(10) == 0) {
             double x = pos.getX() + random.nextDouble();
             double y = pos.getY() + 0.5 + random.nextDouble() * 0.5;

@@ -47,7 +47,6 @@ public class HotCocoaItem extends Item {
         }
 
         if (!level.isClientSide()) {
-            // Apply Regeneration I
             entity.addEffect(new MobEffectInstance(
                 MobEffects.REGENERATION,
                 REGEN_DURATION,
@@ -57,7 +56,6 @@ public class HotCocoaItem extends Item {
                 true
             ));
 
-            // Apply Frostbite Immunity
             entity.addEffect(new MobEffectInstance(
                 ModEffects.FROSTBITE_IMMUNITY,
                 FROSTBITE_IMMUNITY_DURATION,
@@ -68,7 +66,6 @@ public class HotCocoaItem extends Item {
             ));
         }
 
-        // Return empty bucket after drinking (made with milk bucket)
         if (entity instanceof Player player) {
             return ItemUtils.createFilledResult(stack, player, new ItemStack(Items.BUCKET));
         }

@@ -16,15 +16,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-/**
- * Handles player-related events.
- */
 @EventBusSubscriber(modid = Auroral.MOD_ID)
 public class PlayerEventHandler {
 
-    /**
-     * Sync aurora state when a player logs in.
-     */
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
@@ -33,20 +27,13 @@ public class PlayerEventHandler {
         }
     }
 
-    /**
-     * Sync aurora state when a player changes dimension.
-     */
     @SubscribeEvent
     public static void onPlayerChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            // Sync aurora state for the new dimension
             AuroralNetworking.syncAuroraToPlayer(player);
         }
     }
 
-    /**
-     * Sync aurora state when a player respawns.
-     */
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
@@ -79,9 +66,6 @@ public class PlayerEventHandler {
         }
     }
 
-    /**
-     * Repairs Shimmersteel tools and Shimmerweave armor during aurora events.
-     */
     private static void repairAuroraGear(Player player) {
         int repairAmount = AuroralConfig.SERVER.auroraRepairRate.get();
         if (repairAmount <= 0) {
@@ -107,9 +91,6 @@ public class PlayerEventHandler {
         }
     }
 
-    /**
-     * Attempts to repair an item if it's tagged for aurora self-repair and is damaged.
-     */
     private static void tryRepairItem(ItemStack stack, int repairAmount) {
         if (stack.isEmpty() || !stack.isDamageableItem()) {
             return;

@@ -20,17 +20,6 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-/**
- * Aurora Bloom - A crystalline flower that spawns on snow during Aurora events.
- *
- * Has 4 growth stages (age 0-3). Only the final stage (age=3) drops
- * Frozen Petals (1-4 depending on fortune). Harvesting early yields nothing.
- *
- * Properties:
- * - Spawns naturally during Aurora on snow blocks
- * - Grows slowly over time during aurora events
- * - Emits soft light and sparkle particles (intensity increases with age)
- */
 public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
 
     public static final MapCodec<AuroraBloomBlock> CODEC = simpleCodec(AuroraBloomBlock::new);
@@ -84,18 +73,14 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
         return this.mayPlaceOn(level.getBlockState(below), level, below);
     }
 
-    /**
-     * Check if the bloom is fully grown.
-     */
     public boolean isMaxAge(BlockState state) {
         return state.getValue(AGE) >= MAX_AGE;
     }
 
     @Override
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        // Check if we should die (if not on valid block)
         if (!canSurvive(state, level, pos)) {
-            level.destroyBlock(pos, false); // Don't drop anything if dying
+            level.destroyBlock(pos, false);
             return;
         }
 
@@ -105,7 +90,7 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
             level.sendParticles(ParticleTypes.SNOWFLAKE,
                 pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
                 5, 0.3, 0.3, 0.3, 0.01);
-            level.destroyBlock(pos, false); // Don't drop anything when wilting
+            level.destroyBlock(pos, false);
             return;
         }
 
@@ -120,7 +105,6 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         int age = state.getValue(AGE);
 
-        // Sparkle particles (more frequent at higher ages)
         if (random.nextInt(6 - age) == 0) {
             double x = pos.getX() + 0.2 + random.nextDouble() * 0.6;
             double y = pos.getY() + 0.1 + (age * 0.15) + random.nextDouble() * 0.3;
@@ -132,7 +116,6 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
                 (random.nextDouble() - 0.5) * 0.02);
         }
 
-        // Occasional snowflake (only at higher ages)
         if (age >= 2 && random.nextInt(10) == 0) {
             double x = pos.getX() + random.nextDouble();
             double y = pos.getY() + 0.5 + (age * 0.2);
@@ -147,11 +130,8 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
         return 3 + (state.getValue(AGE) * 2) - (state.getValue(AGE) > 2 ? 1 : 0);
     }
 
-    // BonemealableBlock implementation
-
     @Override
     public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state) {
-        // Can only apply bonemeal if not fully grown
         return !isMaxAge(state);
     }
 
@@ -163,7 +143,6 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
 
     @Override
     public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state) {
-        // Advance to next growth stage
         int newAge = Math.min(MAX_AGE, state.getValue(AGE) + 1);
         level.setBlock(pos, state.setValue(AGE, newAge), 2);
     }

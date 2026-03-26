@@ -53,7 +53,6 @@ public class GlowLeekBlock extends CropBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState state, BlockGetter level, BlockPos pos) {
-        // Can only be planted on Shimmering Ice
         return state.getBlock() instanceof ShimmeringIceBlock;
     }
 
@@ -100,7 +99,6 @@ public class GlowLeekBlock extends CropBlock {
 
     @Override
     public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
-        // Glows more as it grows
-        return 3 + (getAge(state) * 2); // 3, 5, 7, 9 light levels
+        return 3 + (getAge(state) * 2);
     }
 }

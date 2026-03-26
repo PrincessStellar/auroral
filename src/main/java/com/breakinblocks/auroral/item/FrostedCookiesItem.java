@@ -22,9 +22,6 @@ public class FrostedCookiesItem extends Item {
         .saturationModifier(0.4f)
         .build();
 
-    /**
-     * Time to eat in ticks - 16 ticks is fast like vanilla cookies.
-     */
     private static final int EAT_DURATION = 16;
 
     public FrostedCookiesItem(Properties properties) {
@@ -38,17 +35,15 @@ public class FrostedCookiesItem extends Item {
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
-        // Spawn shimmer particles around the entity when eating
         if (level instanceof ServerLevel serverLevel) {
             double x = entity.getX();
             double y = entity.getY() + entity.getBbHeight() * 0.5;
             double z = entity.getZ();
 
-            // Spawn a burst of shimmer particles
             for (int i = 0; i < 8; i++) {
-                double offsetX = (level.random.nextDouble() - 0.5) * 0.5;
-                double offsetY = (level.random.nextDouble() - 0.5) * 0.5;
-                double offsetZ = (level.random.nextDouble() - 0.5) * 0.5;
+                double offsetX = (level.getRandom().nextDouble() - 0.5) * 0.5;
+                double offsetY = (level.getRandom().nextDouble() - 0.5) * 0.5;
+                double offsetZ = (level.getRandom().nextDouble() - 0.5) * 0.5;
 
                 serverLevel.sendParticles(
                     ModParticles.SHIMMER.get(),

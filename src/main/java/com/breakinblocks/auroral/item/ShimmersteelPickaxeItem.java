@@ -9,19 +9,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Set;
 
-/**
- * Shimmersteel Pickaxe with inherent Fortune III for gems only.
- *
- * When mining gem-type ores (diamond, emerald, lapis, redstone, amethyst, quartz),
- * this pickaxe applies Fortune III bonus drops even without the enchantment.
- *
- * The Fortune effect is applied via event handler in ShimmersteelEventHandler.
- */
 public class ShimmersteelPickaxeItem extends Item {
 
-    /**
-     * Set of blocks that count as "gems" for the Fortune bonus.
-     */
     private static final Set<Block> GEM_BLOCKS = Set.of(
         Blocks.DIAMOND_ORE,
         Blocks.DEEPSLATE_DIAMOND_ORE,
@@ -42,22 +31,13 @@ public class ShimmersteelPickaxeItem extends Item {
         super(properties.pickaxe(ModToolTiers.SHIMMERSTEEL, 1.0f, -2.8f));
     }
 
-    /**
-     * Checks if a block is a gem-type block that should receive Fortune bonus.
-     */
     public static boolean isGemBlock(BlockState state) {
-        // Check hardcoded set first
         if (GEM_BLOCKS.contains(state.getBlock())) {
             return true;
         }
-        // Also check the tag for modded gems
         return state.is(ModTags.Blocks.GEM_ORES);
     }
 
-    /**
-     * Gets the effective Fortune level for this pickaxe when mining the given block.
-     * Returns 3 (Fortune III) for gem blocks, 0 otherwise (unless enchanted).
-     */
     public static int getEffectiveFortuneLevel(BlockState state) {
         if (isGemBlock(state)) {
             return 3;

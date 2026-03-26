@@ -59,7 +59,7 @@ public class AuroraSparkleParticle extends SimpleAnimatedParticle {
     }
 
     @Override
-    public int getLightColor(float partialTick) {
+    public int getLightCoords(float partialTick) {
         // Self-illuminated
         return 0xF000F0;
     }

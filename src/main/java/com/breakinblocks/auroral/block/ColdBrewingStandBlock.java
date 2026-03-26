@@ -44,7 +44,6 @@ public class ColdBrewingStandBlock extends BaseEntityBlock {
         BlockStateProperties.HAS_BOTTLE_2
     };
 
-    // Shape similar to vanilla brewing stand
     protected static final VoxelShape SHAPE = Shapes.or(
         Block.box(1.0, 0.0, 1.0, 15.0, 2.0, 15.0),  // Base
         Block.box(7.0, 0.0, 7.0, 9.0, 14.0, 9.0)    // Stand
@@ -113,7 +112,6 @@ public class ColdBrewingStandBlock extends BaseEntityBlock {
 
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
-        // Spawn snowflake particles instead of smoke
         double x = pos.getX() + 0.4 + random.nextFloat() * 0.2;
         double y = pos.getY() + 0.7 + random.nextFloat() * 0.3;
         double z = pos.getZ() + 0.4 + random.nextFloat() * 0.2;

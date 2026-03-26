@@ -53,7 +53,7 @@ public class AuroraEventHandler {
         }
 
         ResourceKey<Level> dimensionKey = level.dimension();
-        long currentDayTime = level.getDayTime() % 24000;
+        long currentDayTime = level.getOverworldClockTime() % 24000;
         long gameTime = level.getGameTime();
 
         // Check for night start transition (13000) - per dimension
@@ -71,9 +71,7 @@ public class AuroraEventHandler {
             if (currentDayTime >= 23000 || currentDayTime < 13000 || state.isExpired(gameTime)) {
                 endAurora(level);
             } else {
-                // Aurora is active - spawn Frost-Glaze Blooms
                 trySpawnFrostGlazeBlooms(level, gameTime);
-                // Aurora is active - try to spawn Auroral Nautilus
                 trySpawnAuroralNautilus(level, gameTime);
             }
         }
@@ -334,7 +332,7 @@ public class AuroraEventHandler {
         int duration = minDuration + random.nextInt(maxDuration - minDuration + 1);
 
         // Clamp duration to not extend past dawn
-        long currentDayTime = level.getDayTime() % 24000;
+        long currentDayTime = level.getOverworldClockTime() % 24000;
         long ticksUntilDawn = (23000 - currentDayTime + 24000) % 24000;
         duration = (int) Math.min(duration, ticksUntilDawn);
 

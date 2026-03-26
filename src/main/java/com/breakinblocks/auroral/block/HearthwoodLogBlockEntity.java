@@ -19,31 +19,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-/**
- * Block entity for the Hearthwood Log.
- * Tracks burn time and applies effects to nearby players.
- */
 public class HearthwoodLogBlockEntity extends BlockEntity {
 
-    /**
-     * Total burn time: 7 days = 7 * 24000 ticks = 168000 ticks
-     */
-    public static final int MAX_BURN_TIME = 168000;
-
-    /**
-     * Effect radius in blocks
-     */
+    public static final int MAX_BURN_TIME = 168000; // 7 days
     public static final double EFFECT_RADIUS = 16.0;
-
-    /**
-     * How often to apply effects (every 2 seconds)
-     */
-    private static final int EFFECT_INTERVAL = 40;
-
-    /**
-     * Duration of immunity effect (3 seconds, refreshed every 2)
-     */
-    private static final int EFFECT_DURATION = 60;
+    private static final int EFFECT_INTERVAL = 40; // 2 seconds
+    private static final int EFFECT_DURATION = 60; // 3 seconds
 
     private int burnTimeRemaining = MAX_BURN_TIME;
     private int effectTimer = 0;
@@ -57,31 +38,25 @@ public class HearthwoodLogBlockEntity extends BlockEntity {
             return;
         }
 
-        // Only tick if lit
         if (!state.getValue(HearthwoodLogBlock.LIT)) {
             return;
         }
 
-        // Decrease burn time
         blockEntity.burnTimeRemaining--;
 
-        // Check if burned out
         if (blockEntity.burnTimeRemaining <= 0) {
-            // Extinguish the log
             level.setBlock(pos, state.setValue(HearthwoodLogBlock.LIT, false), 3);
             blockEntity.setChanged();
             return;
         }
 
-        // Apply effects periodically
         blockEntity.effectTimer++;
         if (blockEntity.effectTimer >= EFFECT_INTERVAL) {
             blockEntity.effectTimer = 0;
             blockEntity.applyEffectsToNearbyPlayers(serverLevel, pos);
         }
 
-        // Mark changed occasionally for saving
-        if (blockEntity.burnTimeRemaining % 1200 == 0) { // Every minute
+        if (blockEntity.burnTimeRemaining % 1200 == 0) {
             blockEntity.setChanged();
         }
     }
@@ -91,16 +66,13 @@ public class HearthwoodLogBlockEntity extends BlockEntity {
         List<Player> nearbyPlayers = level.getEntitiesOfClass(Player.class, effectBox);
 
         for (Player player : nearbyPlayers) {
-            // Grant Frostbite immunity (by giving resistance to our Frostbite effect)
-            // We'll use Fire Resistance as a proxy since it thematically makes sense
-            // for a warm fire, and also add our custom immunity via the event handler
             player.addEffect(new MobEffectInstance(
                 ModEffects.FROSTBITE_IMMUNITY,
                 EFFECT_DURATION,
                 0,
-                true,  // ambient
-                false, // visible
-                true   // show icon
+                true,
+                false,
+                true
             ));
         }
     }

@@ -16,13 +16,6 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Block entity for the Glacial Basin.
- * Handles aura collection during aurora events.
- *
- * Note: Aura level is stored in the block state (single source of truth).
- * This BlockEntity only tracks the fill tick counter for aura collection timing.
- */
 public class GlacialBasinBlockEntity extends BlockEntity {
     private int fillTickCounter = 0;
 
@@ -30,15 +23,11 @@ public class GlacialBasinBlockEntity extends BlockEntity {
         super(ModBlockEntities.GLACIAL_BASIN.get(), pos, state);
     }
 
-    /**
-     * Server-side tick handler.
-     */
     public static void serverTick(Level level, BlockPos pos, BlockState state, GlacialBasinBlockEntity blockEntity) {
         if (!(level instanceof ServerLevel serverLevel)) {
             return;
         }
 
-        // Only collect aura during aurora in cold biomes
         if (!AuroraHelper.isAuroraActive(serverLevel)) {
             return;
         }
@@ -50,28 +39,22 @@ public class GlacialBasinBlockEntity extends BlockEntity {
         int maxAura = AuroralConfig.SERVER.basinMaxAura.get();
         int currentAura = state.getValue(GlacialBasinBlock.AURA_LEVEL);
 
-        // Already full
         if (currentAura >= maxAura) {
             return;
         }
 
-        // Increment fill counter
         blockEntity.fillTickCounter++;
 
         int fillRate = AuroralConfig.SERVER.basinFillRate.get();
         if (blockEntity.fillTickCounter >= fillRate) {
             blockEntity.fillTickCounter = 0;
 
-            // Add one aura level
             int newLevel = Math.min(currentAura + 1, maxAura);
             level.setBlock(pos, state.setValue(GlacialBasinBlock.AURA_LEVEL, newLevel), 3);
             blockEntity.setChanged();
         }
     }
 
-    /**
-     * Gets the current aura level from the block state (single source of truth).
-     */
     public int getAuraLevel() {
         BlockState state = getBlockState();
         if (state.hasProperty(GlacialBasinBlock.AURA_LEVEL)) {
@@ -80,9 +63,6 @@ public class GlacialBasinBlockEntity extends BlockEntity {
         return 0;
     }
 
-    /**
-     * Sets the aura level by updating the block state.
-     */
     public void setAuraLevel(int newLevel) {
         if (level != null) {
             BlockState state = getBlockState();
@@ -91,16 +71,10 @@ public class GlacialBasinBlockEntity extends BlockEntity {
         }
     }
 
-    /**
-     * Checks if the basin has any aura.
-     */
     public boolean hasAura() {
         return getAuraLevel() > 0;
     }
 
-    /**
-     * Consumes one level of aura from the basin.
-     */
     public void consumeAura() {
         int currentLevel = getAuraLevel();
         if (currentLevel > 0) {
@@ -112,14 +86,12 @@ public class GlacialBasinBlockEntity extends BlockEntity {
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.putInt("FillCounter", fillTickCounter);
-        // Note: AuraLevel is stored in block state, not BlockEntity
     }
 
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         fillTickCounter = input.getIntOr("FillCounter", 0);
-        // Note: AuraLevel is stored in block state, not BlockEntity
     }
 
     @Nullable
@@ -127,7 +99,4 @@ public class GlacialBasinBlockEntity extends BlockEntity {
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
     }
-
-    // Note: The saveAdditional method is used for both persistent storage and update tags in 1.21.11
-    // The auraLevel is already saved in saveAdditional, so it will be synced properly
 }

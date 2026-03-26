@@ -36,29 +36,24 @@ public class ShimmersteelAxeItem extends Item {
         Player player = context.getPlayer();
         ItemStack stack = context.getItemInHand();
 
-        // Check if this is a weatherable copper block
         if (state.getBlock() instanceof WeatheringCopper weatheringBlock) {
-            // Get the next oxidation state
             Optional<BlockState> nextState = weatheringBlock.getNext(state);
 
             if (nextState.isPresent()) {
                 if (!level.isClientSide()) {
                     level.setBlock(pos, nextState.get(), Block.UPDATE_ALL_IMMEDIATE);
 
-                    // Damage the tool
                     if (player != null) {
                         stack.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
                     }
                 }
 
-                // Play oxidation sound
                 level.playSound(player, pos, SoundEvents.AXE_SCRAPE, SoundSource.BLOCKS, 1.0f, 1.0f);
 
                 return InteractionResult.SUCCESS;
             }
         }
 
-        // Fall back to normal axe behavior (stripping logs, etc.)
         return super.useOn(context);
     }
 }

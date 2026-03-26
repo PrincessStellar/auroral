@@ -16,10 +16,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-/**
- * Development commands for testing aurora and weather events.
- * All commands require operator permissions (level 2).
- */
 @EventBusSubscriber(modid = Auroral.MOD_ID)
 public class AuroraCommand {
 
@@ -48,17 +44,11 @@ public class AuroraCommand {
         Auroral.LOGGER.debug("Registered /aurora command");
     }
 
-    /**
-     * Starts an aurora event with the specified duration.
-     */
     private static int startAurora(CommandContext<CommandSourceStack> ctx, int duration) {
         CommandSourceStack source = ctx.getSource();
         ServerLevel level = source.getLevel();
 
-        // Start the aurora
         AuroraHelper.startAurora(level, duration);
-
-        // Sync to all clients
         AuroralNetworking.syncAuroraToAll(level, true);
 
         // Calculate duration in seconds for display
@@ -77,19 +67,13 @@ public class AuroraCommand {
         return 1;
     }
 
-    /**
-     * Stops the current aurora event.
-     */
     private static int stopAurora(CommandContext<CommandSourceStack> ctx) {
         CommandSourceStack source = ctx.getSource();
         ServerLevel level = source.getLevel();
 
         boolean wasActive = AuroraHelper.isAuroraActive(level);
 
-        // End the aurora
         AuroraHelper.endAurora(level);
-
-        // Sync to all clients
         AuroralNetworking.syncAuroraToAll(level, false);
 
         if (wasActive) {
@@ -100,16 +84,13 @@ public class AuroraCommand {
         return 1;
     }
 
-    /**
-     * Shows the current aurora status.
-     */
     private static int getStatus(CommandContext<CommandSourceStack> ctx) {
         CommandSourceStack source = ctx.getSource();
         ServerLevel level = source.getLevel();
 
         AuroraState state = AuroraHelper.getAuroraState(level);
         long gameTime = level.getGameTime();
-        long dayTime = level.getDayTime() % 24000;
+        long dayTime = level.getOverworldClockTime() % 24000;
 
         boolean isNight = AuroraHelper.isNightTime(level);
 

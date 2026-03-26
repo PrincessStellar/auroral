@@ -109,42 +109,33 @@ public class GlacialBasinBlock extends BaseEntityBlock {
 
         int auraLevel = state.getValue(AURA_LEVEL);
 
-        // Try infusion based on item type and aura requirements
         InfusionRecipe recipe = getInfusionRecipe(stack);
         if (recipe != null) {
             if (auraLevel >= recipe.auraCost) {
-                // Perform infusion
                 stack.shrink(1);
 
-                // Give result to player
                 if (!player.getInventory().add(recipe.result.copy())) {
                     player.drop(recipe.result.copy(), false);
                 }
 
-                // Consume the required aura
                 int newAuraLevel = auraLevel - recipe.auraCost;
                 level.setBlock(pos, state.setValue(AURA_LEVEL, newAuraLevel), 3);
                 basin.setAuraLevel(newAuraLevel);
 
-                // Effects
                 level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0F, 1.0F);
 
                 return InteractionResult.SUCCESS;
             } else {
-                // Not enough aura - show message
-                player.displayClientMessage(
-                    Component.translatable("block.auroral.glacial_basin.not_enough_aura", recipe.auraCost),
-                    true
+                player.sendOverlayMessage(
+                    Component.translatable("block.auroral.glacial_basin.not_enough_aura", recipe.auraCost)
                 );
                 return InteractionResult.CONSUME;
             }
         }
 
-        // Empty hand - show status
         if (stack.isEmpty()) {
-            player.displayClientMessage(
-                Component.translatable("block.auroral.glacial_basin.aura_level", auraLevel, 3),
-                true
+            player.sendOverlayMessage(
+                Component.translatable("block.auroral.glacial_basin.aura_level", auraLevel, 3)
             );
             return InteractionResult.SUCCESS;
         }
@@ -152,15 +143,8 @@ public class GlacialBasinBlock extends BaseEntityBlock {
         return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
-    /**
-     * Record for basin infusion recipes with aura cost.
-     */
     public record InfusionRecipe(ItemStack result, int auraCost) {}
 
-    /**
-     * Gets the infusion recipe for the given item, including aura cost.
-     * Returns null if no valid infusion exists.
-     */
     public static InfusionRecipe getInfusionRecipe(ItemStack input) {
         if (input.isEmpty()) {
             return null;
@@ -189,18 +173,11 @@ public class GlacialBasinBlock extends BaseEntityBlock {
         return null;
     }
 
-    /**
-     * Gets the result of infusing the given item.
-     * Returns empty stack if no valid infusion exists.
-     */
     public static ItemStack getInfusionResult(ItemStack input) {
         InfusionRecipe recipe = getInfusionRecipe(input);
         return recipe != null ? recipe.result.copy() : ItemStack.EMPTY;
     }
 
-    /**
-     * Checks if the given item can be infused in the basin.
-     */
     public static boolean canInfuse(ItemStack input) {
         return getInfusionRecipe(input) != null;
     }

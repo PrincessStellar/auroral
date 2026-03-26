@@ -8,9 +8,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-/**
- * Payload for syncing aurora state from server to client.
- */
 public record SyncAuroraPayload(boolean active) implements CustomPacketPayload {
     public static final Type<SyncAuroraPayload> TYPE = new Type<>(Auroral.id("sync_aurora"));
 
@@ -24,9 +21,6 @@ public record SyncAuroraPayload(boolean active) implements CustomPacketPayload {
         return TYPE;
     }
 
-    /**
-     * Handle the payload on the client side.
-     */
     public static void handleOnClient(SyncAuroraPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> ClientAuroraState.setAuroraActive(payload.active));
     }

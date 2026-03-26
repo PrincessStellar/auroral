@@ -20,10 +20,6 @@ import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
 @EventBusSubscriber(modid = Auroral.MOD_ID)
 public class FrostbiteEventHandler {
 
-    /**
-     * Reduces healing when entity has Frostbite effect.
-     * Healing is reduced by 25% per level.
-     */
     @SubscribeEvent
     public static void onLivingHeal(LivingHealEvent event) {
         LivingEntity entity = event.getEntity();

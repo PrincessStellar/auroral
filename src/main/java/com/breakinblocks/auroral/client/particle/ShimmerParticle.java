@@ -42,7 +42,7 @@ public class ShimmerParticle extends SimpleAnimatedParticle {
     }
 
     @Override
-    public int getLightColor(float partialTick) {
+    public int getLightCoords(float partialTick) {
         return 0xF000F0;
     }
 

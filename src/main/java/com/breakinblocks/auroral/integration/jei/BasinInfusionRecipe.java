@@ -1,9 +1,8 @@
 package com.breakinblocks.auroral.integration.jei;
 
-import net.minecraft.world.item.ItemStack;
+// TODO: Uncomment when JEI is available for 26.1
 
-/**
- * Simple data class representing a basin infusion recipe for JEI display.
- */
-public record BasinInfusionRecipe(ItemStack input, ItemStack output) {
-}
+// import net.minecraft.world.item.ItemStack;
+//
+// public record BasinInfusionRecipe(ItemStack input, ItemStack output) {
+// }

@@ -8,7 +8,9 @@ import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
+import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -19,7 +21,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.state.LevelRenderState;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -72,35 +74,28 @@ public class AuroraSkyRenderer {
                     .withLocation("auroral/pipeline/aurora")
                     .withVertexShader("core/position_color")
                     .withFragmentShader("core/position_color")
-                    .withBlend(new BlendFunction(
+                    .withColorTargetState(new ColorTargetState(new BlendFunction(
                             com.mojang.blaze3d.platform.SourceFactor.SRC_ALPHA,
                             com.mojang.blaze3d.platform.DestFactor.ONE,
                             com.mojang.blaze3d.platform.SourceFactor.ONE,
                             com.mojang.blaze3d.platform.DestFactor.ZERO
-                    ))
+                    )))
                     .withCull(false)
-                    .withDepthWrite(false)
-                    .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                    .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
                     .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLE_STRIP)
                     .build();
         }
         return auroraPipeline;
     }
 
-    /**
-     * Event handler needed to render aurora after sky rendering.
-     */
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent.AfterSky event) {
-        // Early exit if disabled in config
         if (!AuroralConfig.CLIENT.showAuroraEffect.get()) {
             smoothedIntensity = 0.0f;
             return;
         }
 
-        // Check if aurora should be visible
         if (!ClientAuroraState.isAuroraActive()) {
-            // Fade out smoothly
             smoothedIntensity = Math.max(0.0f, smoothedIntensity - INTENSITY_LERP_SPEED);
             if (smoothedIntensity <= 0.01f) {
                 return;
@@ -113,21 +108,17 @@ public class AuroraSkyRenderer {
             return;
         }
 
-        // Dimension check - only render in overworld-like dimensions
         if (!level.dimensionType().hasSkyLight()) {
             return;
         }
 
-        // Only render in cold biomes
         if (!BiomeHelper.canExperienceAurora(level, mc.player.blockPosition())) {
-            // Fade out when leaving cold biomes
             smoothedIntensity = Math.max(0.0f, smoothedIntensity - INTENSITY_LERP_SPEED);
             if (smoothedIntensity <= 0.01f) {
                 return;
             }
         }
 
-        // Calculate aurora intensity based on time of night
         float nightProgress = getNightProgress(level);
         if (nightProgress <= 0 && smoothedIntensity <= 0.01f) {
             return;
@@ -135,10 +126,9 @@ public class AuroraSkyRenderer {
 
         float targetIntensity = calculateIntensity(nightProgress);
 
-        // Apply config intensity multiplier
         targetIntensity *= AuroralConfig.CLIENT.auroraIntensity.get().floatValue();
 
-        // Smooth intensity transitions
+
         if (targetIntensity > smoothedIntensity) {
             smoothedIntensity = Math.min(targetIntensity, smoothedIntensity + INTENSITY_LERP_SPEED);
         } else {
@@ -149,7 +139,6 @@ public class AuroraSkyRenderer {
             return;
         }
 
-        // Render the aurora
         LevelRenderState levelRenderState = event.getLevelRenderState();
         renderAurora(levelRenderState, smoothedIntensity);
     }
@@ -159,18 +148,12 @@ public class AuroraSkyRenderer {
         // Using a modulo here to attempt to prevent float precision loss over time
         float time = (gameTime % (long) TIME_CYCLE) * 0.05f;
 
-        // This was a lot of trial and error getting this working right butttt...
-        // We Calculate total vertices needed for all ribbons...
-        // Each ribbon has (SEGMENTS + 1) * 2 vertices for the triangle strip
-        // Plus 2 vertices between each ribbon pair
         int verticesPerRibbon = (SEGMENTS_PER_RIBBON + 1) * 2;
         int degenerateVertices = 2 * (RIBBON_COUNT - 1);
         int totalVertices = (verticesPerRibbon * RIBBON_COUNT) + degenerateVertices;
         int vertexSize = DefaultVertexFormat.POSITION_COLOR.getVertexSize();
         int bufferSize = totalVertices * vertexSize;
 
-        // Now we build all ribbons into a single mesh
-        // Vertices are in camera relative space (camera at 0,0,0)
         MeshData meshData = null;
         try (ByteBufferBuilder byteBuffer = ByteBufferBuilder.exactlySized(bufferSize)) {
             BufferBuilder builder = new BufferBuilder(byteBuffer, VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
@@ -187,14 +170,12 @@ public class AuroraSkyRenderer {
                 return;
             }
 
-            // Reuse or create vertex buffer
             GpuBuffer vertexBuffer = getOrCreateVertexBuffer(bufferSize, meshData);
             if (vertexBuffer == null) {
                 meshData.close();
                 return;
             }
 
-            // Get render target... hopefully
             Minecraft mc = Minecraft.getInstance();
             var renderTarget = mc.getMainRenderTarget();
             if (renderTarget == null) {
@@ -209,7 +190,6 @@ public class AuroraSkyRenderer {
                 return;
             }
 
-            // Create transform uniform using the model view matrix
             GpuBufferSlice transformSlice = RenderSystem.getDynamicUniforms().writeTransform(
                     RenderSystem.getModelViewMatrix(),
                     new Vector4f(1.0f, 1.0f, 1.0f, 1.0f),
@@ -291,7 +271,6 @@ public class AuroraSkyRenderer {
             float wave1 = (float) Math.sin(waveTime1 + segmentProgress * 8.0f + ribbonIndex) * 15.0f;
             float wave2 = (float) Math.sin(waveTime2 + segmentProgress * 12.0f + ribbonIndex * 2.0f) * 8.0f;
             float wave3 = (float) Math.sin(waveTime3 + segmentProgress * 4.0f) * 20.0f;
-            // above the player
             float yOffset = wave1 + wave2 + wave3 + RIBBON_Y_OFFSET;
 
             float heightFactor = (float) Math.sin(segmentProgress * Math.PI) * 0.8f + 0.2f;
@@ -359,7 +338,7 @@ public class AuroraSkyRenderer {
     }
 
     private static float getNightProgress(ClientLevel level) {
-        long dayTime = level.getDayTime() % 24000;
+        long dayTime = level.getOverworldClockTime() % 24000;
         if (dayTime < 13000 || dayTime >= 23000) {
             return 0;
         }

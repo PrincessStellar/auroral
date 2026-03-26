@@ -38,14 +38,12 @@ public class ShimmersteelEventHandler {
     public static void onLivingDamage(LivingDamageEvent.Pre event) {
         DamageSource source = event.getSource();
 
-        // Check if attacker is using Shimmersteel Sword
         if (source.getEntity() instanceof LivingEntity attacker) {
             ItemStack weapon = attacker.getMainHandItem();
 
             if (weapon.getItem() instanceof ShimmersteelSwordItem) {
                 LivingEntity target = event.getEntity();
 
-                // Don't execute the attacker themselves
                 if (target == attacker) {
                     return;
                 }
@@ -122,7 +120,6 @@ public class ShimmersteelEventHandler {
     private static void applyFortuneBonus(List<ItemEntity> drops, RandomSource random, int fortuneLevel) {
         for (ItemEntity itemEntity : drops) {
             ItemStack stack = itemEntity.getItem();
-            // Only apply fortune to stackable items (the actual drops, not blocks)
             if (stack.getMaxStackSize() > 1) {
                 // Fortune formula: multiplier is 1 + random(0 to fortuneLevel)
                 // So Fortune III gives 1-4x drops

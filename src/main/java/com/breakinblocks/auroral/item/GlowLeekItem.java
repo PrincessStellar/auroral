@@ -32,7 +32,6 @@ public class GlowLeekItem extends Item {
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
         if (!level.isClientSide()) {
-            // Apply Night Vision
             entity.addEffect(new MobEffectInstance(
                 MobEffects.NIGHT_VISION,
                 NIGHT_VISION_DURATION,

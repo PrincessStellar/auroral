@@ -17,12 +17,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-/**
- * Event handler for creating Snow Angels.
- *
- * When a player sneaks and right-clicks on a snow block with an empty hand,
- * a snow angel imprint is created above the block.
- */
 @EventBusSubscriber(modid = Auroral.MOD_ID)
 public class SnowAngelEventHandler {
 
@@ -31,7 +25,6 @@ public class SnowAngelEventHandler {
         Player player = event.getEntity();
         Level level = event.getLevel();
 
-        // Only trigger when sneaking with empty main hand
         if (!player.isShiftKeyDown()) {
             return;
         }
@@ -40,7 +33,6 @@ public class SnowAngelEventHandler {
             return;
         }
 
-        // Only process main hand to avoid double processing
         if (event.getHand() != InteractionHand.MAIN_HAND) {
             return;
         }
@@ -48,7 +40,6 @@ public class SnowAngelEventHandler {
         BlockPos clickedPos = event.getPos();
         BlockState clickedState = level.getBlockState(clickedPos);
 
-        // Check if clicked block is snow
         if (!isSnowBlock(clickedState)) {
             return;
         }
@@ -82,9 +73,9 @@ public class SnowAngelEventHandler {
         if (level instanceof ServerLevel serverLevel) {
             // Spawn shimmer particles around the snow angel
             for (int i = 0; i < 12; i++) {
-                double offsetX = (level.random.nextDouble() - 0.5) * 1.5;
-                double offsetY = level.random.nextDouble() * 0.3;
-                double offsetZ = (level.random.nextDouble() - 0.5) * 1.5;
+                double offsetX = (level.getRandom().nextDouble() - 0.5) * 1.5;
+                double offsetY = level.getRandom().nextDouble() * 0.3;
+                double offsetZ = (level.getRandom().nextDouble() - 0.5) * 1.5;
 
                 serverLevel.sendParticles(
                     ModParticles.SHIMMER.get(),

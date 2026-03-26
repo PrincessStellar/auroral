@@ -21,29 +21,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
-/**
- * Block entity for the Cold Brewing Stand.
- * Functions like a vanilla brewing stand but uses Snowballs as fuel.
- *
- * Slots:
- * 0-2: Potion bottles
- * 3: Ingredient
- * 4: Fuel (Snowballs)
- */
 public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
 
     private static final int INGREDIENT_SLOT = 3;
     private static final int FUEL_SLOT = 4;
-
-    /**
-     * Fuel per snowball (vanilla blaze powder gives 20).
-     * Snowballs give 10 uses each (less efficient but more accessible).
-     */
     public static final int FUEL_PER_SNOWBALL = 10;
-
-    /**
-     * Time to brew in ticks (same as vanilla: 400 ticks = 20 seconds).
-     */
     public static final int BREW_TIME = 400;
 
     private NonNullList<ItemStack> items = NonNullList.withSize(5, ItemStack.EMPTY);
@@ -51,9 +33,6 @@ public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
     private int fuel;
     private Item ingredient;
 
-    /**
-     * Container data for syncing to client (for GUI).
-     */
     protected final ContainerData dataAccess = new ContainerData() {
         @Override
         public int get(int index) {
@@ -110,11 +89,9 @@ public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
-        // Items are loaded by BaseContainerBlockEntity.loadAdditional
         this.brewTime = input.getIntOr("BrewTime", 0);
         this.fuel = input.getIntOr("Fuel", 0);
 
-        // Load the ingredient item for mid-brew save/load
         String ingredientId = input.getStringOr("Ingredient", "");
         if (!ingredientId.isEmpty()) {
             Identifier itemId = Identifier.tryParse(ingredientId);
@@ -127,32 +104,22 @@ public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        // Items are saved by BaseContainerBlockEntity.saveAdditional
         output.putInt("BrewTime", this.brewTime);
         output.putInt("Fuel", this.fuel);
 
-        // Save the ingredient item for mid-brew save/load
         if (this.ingredient != null) {
             Identifier itemId = BuiltInRegistries.ITEM.getKey(this.ingredient);
             output.putString("Ingredient", itemId.toString());
         }
     }
 
-    /**
-     * Checks if an item is valid fuel for the Cold Brewing Stand.
-     * Uses Snowballs instead of Blaze Powder.
-     */
     public static boolean isValidFuel(ItemStack stack) {
         return stack.is(Items.SNOWBALL);
     }
 
-    /**
-     * Server tick - handles brewing logic.
-     */
     public static void serverTick(Level level, BlockPos pos, BlockState state, ColdBrewingStandBlockEntity blockEntity) {
         ItemStack fuelStack = blockEntity.items.get(FUEL_SLOT);
 
-        // Consume fuel if needed
         if (blockEntity.fuel <= 0 && isValidFuel(fuelStack)) {
             blockEntity.fuel = FUEL_PER_SNOWBALL;
             fuelStack.shrink(1);
@@ -182,7 +149,6 @@ public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
             setChanged(level, pos, state);
         }
 
-        // Update block state for bottles
         boolean[] hasBottle = new boolean[3];
         for (int i = 0; i < 3; i++) {
             hasBottle[i] = !blockEntity.items.get(i).isEmpty();
@@ -200,16 +166,12 @@ public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
         }
     }
 
-    /**
-     * Checks if brewing can proceed.
-     */
     private static boolean canBrew(PotionBrewing brewing, NonNullList<ItemStack> items) {
         ItemStack ingredient = items.get(INGREDIENT_SLOT);
         if (ingredient.isEmpty()) {
             return false;
         }
 
-        // Check if at least one bottle can be brewed
         for (int i = 0; i < 3; i++) {
             ItemStack bottle = items.get(i);
             if (!bottle.isEmpty() && brewing.hasMix(bottle, ingredient)) {
@@ -220,9 +182,6 @@ public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
         return false;
     }
 
-    /**
-     * Performs the brewing operation.
-     */
     private static void doBrew(Level level, BlockPos pos, NonNullList<ItemStack> items, PotionBrewing brewing) {
         ItemStack ingredient = items.get(INGREDIENT_SLOT);
 
@@ -234,27 +193,20 @@ public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
         }
 
         ingredient.shrink(1);
-
-        // Fire brewing event
         level.levelEvent(1035, pos, 0);
     }
 
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
         if (slot == INGREDIENT_SLOT) {
-            // Accept any potion ingredient
             return true;
         } else if (slot == FUEL_SLOT) {
             return isValidFuel(stack);
         } else {
-            // Slots 0-2 are for bottles - check if it's a valid container
             return isValidBottle(stack);
         }
     }
 
-    /**
-     * Checks if an item is a valid bottle for brewing.
-     */
     private static boolean isValidBottle(ItemStack stack) {
         return stack.is(Items.POTION) || stack.is(Items.SPLASH_POTION)
             || stack.is(Items.LINGERING_POTION) || stack.is(Items.GLASS_BOTTLE);

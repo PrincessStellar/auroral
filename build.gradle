@@ -3,7 +3,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.175'
+    id 'net.neoforged.moddev' version '2.0.141'
 }
 
 version = "${minecraft_version}-${project.mod_version}"
@@ -13,46 +13,48 @@ base {
     archivesName = project.archives_base_name
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
-runs {
-    configureEach {
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
-        systemProperty 'forge.logging.console.level', 'debug'
+neoForge {
+    version = project.neoforge_full_version
 
-        modSource project.sourceSets.main
+    runs {
+        configureEach {
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+
+        client {
+            client()
+        }
+
+        server {
+            server()
+            programArguments.add('--nogui')
+        }
+
+        clientData {
+            clientData()
+            programArguments.addAll('--mod', project.mod_id, '--all',
+                '--output', file('src/generated/resources/').absolutePath,
+                '--existing', file('src/main/resources/').absolutePath)
+        }
+
+        serverData {
+            serverData()
+            programArguments.addAll('--mod', project.mod_id, '--all',
+                '--output', file('src/generated/resources/').absolutePath,
+                '--existing', file('src/main/resources/').absolutePath)
+        }
     }
 
-    client {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-    }
-
-    server {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-        argument '--nogui'
-    }
-
-    clientData {
-        arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    mods {
+        "${project.mod_id}" {
+            sourceSet sourceSets.main
+        }
     }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
-
-configurations {
-    runtimeClasspath.extendsFrom localRuntime
-
-    // Force all configurations to use the same ASM version to avoid module conflicts
-    all {
-        resolutionStrategy {
-            force 'org.ow2.asm:asm:9.7'
-            force 'org.ow2.asm:asm-commons:9.7'
-            force 'org.ow2.asm:asm-tree:9.7'
-            force 'org.ow2.asm:asm-util:9.7'
-            force 'org.ow2.asm:asm-analysis:9.7'
-        }
-    }
-}
 
 repositories {
     maven {
@@ -81,31 +83,16 @@ repositories {
 }
 
 dependencies {
-    implementation "net.neoforged:neoforge:${neoforge_full_version}"
+    // JEI - Just Enough Items (update file ID when available for 26.1)
+    // compileOnly("curse.maven:jei-238222:0000000")
+    // localRuntime("curse.maven:jei-238222:0000000")
 
-    // JEI - Just Enough Items (CurseMaven for 1.21.11 support)
-    compileOnly("curse.maven:jei-238222:7364663") {
-        exclude group: 'org.ow2.asm'
-    }
-    localRuntime("curse.maven:jei-238222:7364663") {
-        exclude group: 'org.ow2.asm'
-    }
+    // Jade - Block info tooltips (update file ID when available for 26.1)
+    // compileOnly("curse.maven:jade-324717:0000000")
+    // localRuntime("curse.maven:jade-324717:0000000")
 
-    // Jade - Block info tooltips
-    compileOnly("curse.maven:jade-324717:7313008") {
-        exclude group: 'org.ow2.asm'
-    }
-    localRuntime("curse.maven:jade-324717:7313008") {
-        exclude group: 'org.ow2.asm'
-    }
-
-    // GuideME - In-game guidebook
-    compileOnly("curse.maven:guideme-1173950:7366493") {
-        exclude group: 'org.ow2.asm'
-    }
-    localRuntime("curse.maven:guideme-1173950:7366493") {
-        exclude group: 'org.ow2.asm'
-    }
+    // GuideME - In-game guidebook (alpha targets snapshot-4, not release 26.1 - re-enable when updated)
+    // implementation("curse.maven:guideme-1173950:7504260")
 }
 
 tasks.withType(ProcessResources).configureEach {

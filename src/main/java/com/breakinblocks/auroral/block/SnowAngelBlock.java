@@ -50,9 +50,6 @@ public class SnowAngelBlock extends BaseEntityBlock {
     public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty PERMANENT = BooleanProperty.create("permanent");
 
-    /**
-     * Very thin shape since it's an imprint in the snow.
-     */
     private static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0);
 
     public SnowAngelBlock(Properties properties) {
@@ -91,7 +88,6 @@ public class SnowAngelBlock extends BaseEntityBlock {
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        // No collision - it's just an imprint
         return Shapes.empty();
     }
 
@@ -99,7 +95,6 @@ public class SnowAngelBlock extends BaseEntityBlock {
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         BlockPos below = pos.below();
         BlockState belowState = level.getBlockState(below);
-        // Can only exist on snow blocks, powder snow, or other solid snow-like blocks
         return belowState.is(Blocks.SNOW_BLOCK) ||
                belowState.is(Blocks.POWDER_SNOW) ||
                belowState.is(Blocks.SNOW) ||
@@ -109,9 +104,8 @@ public class SnowAngelBlock extends BaseEntityBlock {
     @Override
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock,
                                    Orientation orientation, boolean movedByPiston) {
-        // Check if the supporting block was removed
         if (!state.canSurvive(level, pos)) {
-            level.destroyBlock(pos, false); // No drops for snow angel imprints
+            level.destroyBlock(pos, false);
         }
     }
 
@@ -132,28 +126,22 @@ public class SnowAngelBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        // Check if player is using Frozen Petals
         if (stack.is(ModItems.FROZEN_PETALS.get())) {
-            // Check if already permanent
             if (state.getValue(PERMANENT)) {
                 return InteractionResult.PASS;
             }
 
-            // Make permanent
             if (!level.isClientSide()) {
                 level.setBlock(pos, state.setValue(PERMANENT, true), 3);
 
-                // Update the block entity
                 if (level.getBlockEntity(pos) instanceof SnowAngelBlockEntity snowAngel) {
                     snowAngel.makePermanent();
                 }
 
-                // Consume one petal
                 if (!player.getAbilities().instabuild) {
                     stack.shrink(1);
                 }
 
-                // Effects
                 level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0f, 1.2f);
                 level.addParticle(ParticleTypes.END_ROD,
                     pos.getX() + 0.5, pos.getY() + 0.25, pos.getZ() + 0.5,

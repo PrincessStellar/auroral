@@ -6,7 +6,9 @@ import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
+import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -16,7 +18,7 @@ import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.state.LevelRenderState;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
@@ -58,10 +60,9 @@ public class SnowFootprintRenderer {
                     .withVertexShader("core/position_tex_color")
                     .withFragmentShader("core/position_tex_color")
                     .withSampler("Sampler0")
-                    .withBlend(BlendFunction.TRANSLUCENT)
+                    .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
                     .withCull(false)
-                    .withDepthWrite(false)
-                    .withDepthTestFunction(DepthTestFunction.LESS_DEPTH_TEST)
+                    .withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN, false))
                     .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
                     .build();
         }
@@ -69,8 +70,7 @@ public class SnowFootprintRenderer {
     }
 
     @SubscribeEvent
-    public static void onRenderLevel(RenderLevelStageEvent.AfterParticles event) {
-        // Early exit if disabled in config
+    public static void onRenderLevel(RenderLevelStageEvent.AfterTranslucentParticles event) {
         if (!AuroralConfig.CLIENT.showFootprints.get()) {
             return;
         }
@@ -89,7 +89,6 @@ public class SnowFootprintRenderer {
         Vec3 camPos = levelState.cameraRenderState.pos;
         long gameTime = levelState.gameTime;
 
-        // Collect visible footprints into reusable array
         int visibleCount = collectVisibleFootprints(footprints, camPos, gameTime);
 
         if (visibleCount == 0) {
@@ -105,7 +104,6 @@ public class SnowFootprintRenderer {
         for (SnowFootprint footprint : footprints) {
             if (visibleCount >= MAX_VISIBLE_FOOTPRINTS) break;
 
-            // Distance culling
             double dx = camPos.x - footprint.position.x;
             double dy = camPos.y - footprint.position.y;
             double dz = camPos.z - footprint.position.z;
@@ -120,7 +118,6 @@ public class SnowFootprintRenderer {
                 continue;
             }
 
-            // Distance fade
             float distanceFade = 1.0f - (float) (distSq / MAX_RENDER_DISTANCE_SQ);
             float finalOpacity = opacity * distanceFade;
             if (finalOpacity < 0.02f) {
@@ -142,7 +139,6 @@ public class SnowFootprintRenderer {
     }
 
     private static void renderFootprints(Vec3 camPos, int count) {
-        // Calculate buffer size: 4 vertices per footprint
         int vertexSize = DefaultVertexFormat.POSITION_TEX_COLOR.getVertexSize();
         int bufferSize = count * 4 * vertexSize;
 
@@ -159,7 +155,6 @@ public class SnowFootprintRenderer {
                 float opacity = footprintData[idx + 4];
                 boolean isLeft = footprintData[idx + 5] > 0.5f;
 
-                // Get block height offset for proper placement
                 float yOffset = getFootprintYOffset(y);
 
                 addFootprintQuad(builder, x, yOffset, z, rotation, opacity, isLeft);
@@ -170,14 +165,12 @@ public class SnowFootprintRenderer {
                 return;
             }
 
-            // Get or create vertex buffer
             GpuBuffer vertexBuffer = getOrCreateVertexBuffer(bufferSize, meshData);
             if (vertexBuffer == null) {
                 meshData.close();
                 return;
             }
 
-            // Get render target safely
             Minecraft mc = Minecraft.getInstance();
             var renderTarget = mc.getMainRenderTarget();
             if (renderTarget == null) {
@@ -192,7 +185,6 @@ public class SnowFootprintRenderer {
                 return;
             }
 
-            // Get texture safely
             AbstractTexture texture = mc.getTextureManager().getTexture(FOOTPRINT_TEXTURE);
             if (texture == null) {
                 meshData.close();
@@ -202,7 +194,6 @@ public class SnowFootprintRenderer {
             RenderSystem.AutoStorageIndexBuffer quadIndices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
             GpuBuffer indexBuffer = quadIndices.getBuffer(count * 6);
 
-            // Create transform uniform
             GpuBufferSlice transformSlice = RenderSystem.getDynamicUniforms().writeTransform(
                     RenderSystem.getModelViewMatrix(),
                     new Vector4f(1.0f, 1.0f, 1.0f, 1.0f),
@@ -239,7 +230,6 @@ public class SnowFootprintRenderer {
             if (cachedVertexBuffer != null) {
                 cachedVertexBuffer.close();
             }
-            // Create buffer with initial data - size is derived from ByteBuffer
             cachedVertexBuffer = RenderSystem.getDevice().createBuffer(
                     () -> "Footprint vertex buffer",
                     GpuBuffer.USAGE_VERTEX,
@@ -266,8 +256,6 @@ public class SnowFootprintRenderer {
         float hw = FOOTPRINT_WIDTH;
         float hl = FOOTPRINT_LENGTH;
 
-        // Calculate rotated corners (front-left, front-right, back-right, back-left)
-        // Pre-compute products to reduce multiplications
         float hwCos = hw * cos;
         float hwSin = hw * sin;
         float hlCos = hl * cos;
@@ -282,17 +270,14 @@ public class SnowFootprintRenderer {
         float c3x = -hwCos + hlSin;
         float c3z = -hwSin - hlCos;
 
-        // UV coordinates - flip for left foot
         float u0 = isLeft ? 1.0f : 0.0f;
         float u1 = isLeft ? 0.0f : 1.0f;
 
-        // Dark gray color for footprint depression
         int r = 60;
         int g = 60;
         int b = 70;
         int alpha = clamp((int) (opacity * 180), 0, 255);
 
-        // Add quad vertices
         builder.addVertex(x + c0x, y, z + c0z)
                 .setUv(u0, 0.0f)
                 .setColor(r, g, b, alpha);

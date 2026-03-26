@@ -31,10 +31,6 @@ public class ShimmersteelHoeItem extends Item {
         super(properties.hoe(ModToolTiers.SHIMMERSTEEL, -2.0f, -1.0f));
     }
 
-    /**
-     * Checks if this item should apply silk touch effect.
-     * Always returns true for Shimmersteel Hoe.
-     */
     public boolean hasInherentSilkTouch() {
         return true;
     }
@@ -46,19 +42,14 @@ public class ShimmersteelHoeItem extends Item {
         BlockState state = level.getBlockState(pos);
         Player player = context.getPlayer();
 
-        // Check if clicking on snow layers (not snow block)
         if (SnowBlockHelper.isSnowLayer(state)) {
-            // For snow layers, till the block underneath and remove the snow
             BlockPos belowPos = pos.below();
             BlockState belowState = level.getBlockState(belowPos);
 
-            // Check if the block below can be tilled (dirt, grass, snow block, powder snow)
             if (SnowBlockHelper.canTillToShimmerSoil(belowState)) {
                 BlockState shimmerSoil = ModBlocks.SHIMMER_SOIL.get().defaultBlockState();
                 if (!level.isClientSide()) {
-                    // Remove snow layers
                     level.removeBlock(pos, false);
-                    // Convert block below to shimmer soil
                     level.setBlock(belowPos, shimmerSoil, 11);
                     level.gameEvent(GameEvent.BLOCK_CHANGE, belowPos, GameEvent.Context.of(player, shimmerSoil));
                 }
@@ -67,9 +58,7 @@ public class ShimmersteelHoeItem extends Item {
                 return InteractionResult.SUCCESS;
             }
         }
-        // Check if clicking on snow block or powder snow (convert directly)
         else if (SnowBlockHelper.isSolidSnow(state)) {
-            // Need air above for shimmer soil
             if (level.getBlockState(pos.above()).isAir()) {
                 BlockState shimmerSoil = ModBlocks.SHIMMER_SOIL.get().defaultBlockState();
                 if (!level.isClientSide()) {
@@ -81,12 +70,10 @@ public class ShimmersteelHoeItem extends Item {
                 return InteractionResult.SUCCESS;
             }
         }
-        // Check if clicking on regular farmland (upgrade to shimmer soil)
         else if (state.is(Blocks.FARMLAND)) {
             BlockState shimmerSoil = ModBlocks.SHIMMER_SOIL.get().defaultBlockState();
-            // Preserve moisture level
-            int moisture = state.getValue(net.minecraft.world.level.block.FarmBlock.MOISTURE);
-            shimmerSoil = shimmerSoil.setValue(net.minecraft.world.level.block.FarmBlock.MOISTURE, moisture);
+            int moisture = state.getValue(net.minecraft.world.level.block.FarmlandBlock.MOISTURE);
+            shimmerSoil = shimmerSoil.setValue(net.minecraft.world.level.block.FarmlandBlock.MOISTURE, moisture);
 
             if (!level.isClientSide()) {
                 level.setBlock(pos, shimmerSoil, 11);
@@ -96,9 +83,7 @@ public class ShimmersteelHoeItem extends Item {
             damageItem(context, player);
             return InteractionResult.SUCCESS;
         }
-        // Check if clicking on dirt, grass, or similar blocks (till directly to shimmer soil)
         else if (SnowBlockHelper.canTillToShimmerSoil(state)) {
-            // Need air above for shimmer soil (like regular farmland)
             if (level.getBlockState(pos.above()).isAir()) {
                 BlockState shimmerSoil = ModBlocks.SHIMMER_SOIL.get().defaultBlockState();
                 if (!level.isClientSide()) {
@@ -111,13 +96,9 @@ public class ShimmersteelHoeItem extends Item {
             }
         }
 
-        // No valid tilling action
         return InteractionResult.PASS;
     }
 
-    /**
-     * Helper method to damage the item after use.
-     */
     private static void damageItem(UseOnContext context, Player player) {
         if (player != null) {
             context.getItemInHand().hurtAndBreak(1, player,

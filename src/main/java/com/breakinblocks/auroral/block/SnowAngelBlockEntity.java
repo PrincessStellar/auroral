@@ -14,16 +14,9 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Block entity for Snow Angel that tracks age and permanence.
- * Snow angels fade away after 5 minutes unless preserved with a Frozen Petal.
- */
 public class SnowAngelBlockEntity extends BlockEntity {
 
-    /**
-     * Time until the snow angel fades: 5 minutes = 6000 ticks
-     */
-    public static final int FADE_TIME = 6000;
+    public static final int FADE_TIME = 6000; // 5 minutes
 
     private int age = 0;
     private boolean permanent = false;
@@ -37,50 +30,34 @@ public class SnowAngelBlockEntity extends BlockEntity {
             return;
         }
 
-        // Don't age if permanent
         if (blockEntity.permanent) {
             return;
         }
 
         blockEntity.age++;
 
-        // Fade away when time is up
         if (blockEntity.age >= FADE_TIME) {
-            // Spawn particles before removing
             serverLevel.sendParticles(ParticleTypes.SNOWFLAKE,
                 pos.getX() + 0.5, pos.getY() + 0.25, pos.getZ() + 0.5,
                 10, 0.5, 0.1, 0.5, 0.02);
 
-            // Remove the block without drops
             level.removeBlock(pos, false);
         }
     }
 
-    /**
-     * Makes this snow angel permanent (won't fade).
-     */
     public void makePermanent() {
         this.permanent = true;
         this.setChanged();
     }
 
-    /**
-     * Checks if this snow angel is permanent.
-     */
     public boolean isPermanent() {
         return permanent;
     }
 
-    /**
-     * Gets the current age in ticks.
-     */
     public int getAge() {
         return age;
     }
 
-    /**
-     * Gets the fade progress (0.0 = fresh, 1.0 = about to fade).
-     */
     public float getFadeProgress() {
         if (permanent) return 0.0f;
         return (float) age / FADE_TIME;
