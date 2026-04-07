@@ -106,5 +106,3 @@ local/
 !LICENSE.md
 !README.md
 !metadata/changelogs/*.md
-
-gradle/wrapper/gradle-wrapper.properties
