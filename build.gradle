@@ -170,9 +170,20 @@ publishMods {
         optional("jei", "jade", "guideme")
     }
 
-    github {
-        repository = "breakinblocks/auroral"
-        accessToken = providers.environmentVariable("GITHUB_TOKEN")
-        commitish = "main"
+    def githubToken = providers.environmentVariable("GITHUB_TOKEN")
+    if (githubToken.isPresent()) {
+        github {
+            repository = "breakinblocks/auroral"
+            accessToken = githubToken
+            commitish = "main"
+        }
+    }
+}
+
+// Include Maven publish when running publishMods
+tasks.named('publishMods') {
+    def mavenUser = providers.environmentVariable("MAVEN_USER")
+    if (mavenUser.isPresent()) {
+        dependsOn 'publishMavenJavaPublicationToBreakInBlocksRepository'
     }
 }
