@@ -34,13 +34,9 @@ jobs:
           MAVEN_USER: ${{ secrets.MAVEN_USER }}
           MAVEN_TOKEN: ${{ secrets.MAVEN_TOKEN }}
 
-      - name: Get version from tag
-        id: version
-        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: "Auroral ${{ steps.version.outputs.version }}"
-          files: build/libs/auroral-*.jar
-          generate_release_notes: true
+      - name: Publish to CurseForge, Modrinth, and GitHub
+        run: ./gradlew publishMods
+        env:
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

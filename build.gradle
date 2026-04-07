@@ -4,6 +4,7 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.141'
+    id 'me.modmuss50.mod-publish-plugin' version '1.1.0'
 }
 
 version = "${minecraft_version}-${project.mod_version}"
@@ -143,5 +144,35 @@ publishing {
                 password = System.getenv("MAVEN_TOKEN") ?: ""
             }
         }
+    }
+}
+
+// Mod publishing to CurseForge, Modrinth, and GitHub
+publishMods {
+    file = jar.archiveFile
+    def changelogFile = file("metadata/changelogs/${mod_version}.md")
+    changelog = changelogFile.exists() ? changelogFile.text : "Release ${version}"
+    type = STABLE
+    modLoaders.add("neoforge")
+
+    curseforge {
+        projectId = "1422678"
+        projectSlug = "auroral"
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        minecraftVersions.add(minecraft_version)
+        optional("jei", "jade", "guideme")
+    }
+
+    modrinth {
+        projectId = "atxUWJdN"
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        minecraftVersions.add(minecraft_version)
+        optional("jei", "jade", "guideme")
+    }
+
+    github {
+        repository = "breakinblocks/auroral"
+        accessToken = providers.environmentVariable("GITHUB_TOKEN")
+        commitish = "main"
     }
 }
