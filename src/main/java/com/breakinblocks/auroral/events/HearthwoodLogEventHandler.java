@@ -32,7 +32,7 @@ public class HearthwoodLogEventHandler {
         MobEffectInstance effectToApply = event.getEffectInstance();
 
         // Check if trying to apply Frostbite - use .is() for proper Holder comparison
-        if (effectToApply.getEffect().is(ModEffects.FROSTBITE)) {
+        if (effectToApply.getEffect().is(ModEffects.FROSTBITE.unwrapKey().orElseThrow())) {
             // Check if entity has Frostbite Immunity
             if (entity.hasEffect(ModEffects.FROSTBITE_IMMUNITY)) {
                 event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);

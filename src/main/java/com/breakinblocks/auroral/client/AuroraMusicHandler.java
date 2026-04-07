@@ -52,6 +52,9 @@ public class AuroraMusicHandler {
     private static void startMusic() {
         Minecraft mc = Minecraft.getInstance();
         if (currentMusic == null || !mc.getSoundManager().isActive(currentMusic)) {
+            // Stop vanilla music so it doesn't play over the aurora music
+            mc.getMusicManager().stopPlaying();
+
             currentMusic = new AuroraMusicSoundInstance();
             mc.getSoundManager().play(currentMusic);
             wasPlaying = true;

@@ -1,12 +1,12 @@
 package com.breakinblocks.auroral.registry;
 
 import com.breakinblocks.auroral.Auroral;
-// import com.breakinblocks.auroral.integration.guideme.AuroralGuide; // GuideME
+import com.breakinblocks.auroral.integration.guideme.AuroralGuide;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-// import net.neoforged.fml.ModList; // GuideME
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -14,22 +14,25 @@ public class ModCreativeTabs {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
         DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Auroral.MOD_ID);
 
+    public static boolean isGuideMELoaded() {
+        return ModList.get().isLoaded("guideme");
+    }
+
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> AURORABOUND_TAB =
         CREATIVE_TABS.register("auroral", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.auroral"))
             .icon(() -> new ItemStack(ModItems.AURORA_SHARD.get()))
             .displayItems((parameters, output) -> {
-                // GuideME alpha targets snapshot, not release 26.1 - re-enable when updated
-                // if (ModList.get().isLoaded("guideme")) {
-                //     try {
-                //         ItemStack guideItem = guideme.Guides.createGuideItem(AuroralGuide.GUIDE_ID);
-                //         if (guideItem != null && !guideItem.isEmpty()) {
-                //             output.accept(guideItem);
-                //         }
-                //     } catch (Exception e) {
-                //         Auroral.LOGGER.debug("Could not add GuideME guidebook to creative tab: {}", e.getMessage());
-                //     }
-                // }
+                if (isGuideMELoaded()) {
+                    try {
+                        ItemStack guideItem = guideme.Guides.createGuideItem(AuroralGuide.GUIDE_ID);
+                        if (guideItem != null && !guideItem.isEmpty()) {
+                            output.accept(guideItem);
+                        }
+                    } catch (Exception e) {
+                        Auroral.LOGGER.debug("Could not add GuideME guidebook to creative tab: {}", e.getMessage());
+                    }
+                }
 
                 output.accept(ModBlocks.GLACIAL_BASIN.get());
                 output.accept(ModBlocks.COLD_BREWING_STAND.get());

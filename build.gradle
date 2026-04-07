@@ -83,16 +83,16 @@ repositories {
 }
 
 dependencies {
-    // JEI - Just Enough Items (update file ID when available for 26.1)
-    // compileOnly("curse.maven:jei-238222:0000000")
-    // localRuntime("curse.maven:jei-238222:0000000")
+    // JEI - Just Enough Items
+    compileOnly("mezz.jei:jei-26.1.1-neoforge-api:29.4.0.23")
+    runtimeOnly("mezz.jei:jei-26.1.1-neoforge:29.4.0.23")
 
-    // Jade - Block info tooltips (update file ID when available for 26.1)
-    // compileOnly("curse.maven:jade-324717:0000000")
-    // localRuntime("curse.maven:jade-324717:0000000")
+    // Jade - Block info tooltips
+    implementation("curse.maven:jade-324717:7815579")
 
-    // GuideME - In-game guidebook (alpha targets snapshot-4, not release 26.1 - re-enable when updated)
-    // implementation("curse.maven:guideme-1173950:7504260")
+    // GuideME - In-game guidebook (optional)
+    compileOnly("curse.maven:guideme-1173950:7885779")
+    runtimeOnly("curse.maven:guideme-1173950:7885779")
 }
 
 tasks.withType(ProcessResources).configureEach {

@@ -133,7 +133,7 @@ public class ThrownShimmerSpear extends AbstractArrow {
         DamageSource damageSource = this.damageSources().trident(this, owner == null ? this : owner);
         this.dealtDamage = true;
 
-        if (target.hurtOrSimulate(damageSource, damage)) {
+        if (this.level() instanceof ServerLevel serverLevel && target.hurtServer(serverLevel, damageSource, damage)) {
             if (target.getType() == EntityType.ENDERMAN) {
                 return;
             }

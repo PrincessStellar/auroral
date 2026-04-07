@@ -15,13 +15,13 @@ import com.breakinblocks.auroral.registry.ModParticles;
 import com.breakinblocks.auroral.registry.ModSounds;
 import com.breakinblocks.auroral.events.EntityEventHandler;
 import com.breakinblocks.auroral.events.ItemEventHandler;
-// import com.breakinblocks.auroral.integration.guideme.AuroralGuide; // GuideME alpha targets snapshot, not release 26.1
+import com.breakinblocks.auroral.integration.guideme.AuroralGuide;
 import com.breakinblocks.auroral.net.AuroralNetworking;
 import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
-// import net.neoforged.fml.ModList; // GuideME
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import org.slf4j.Logger;
@@ -66,13 +66,13 @@ public class Auroral {
 
         // Client-specific setup
         if (dist.isClient()) {
+            // Register the GuideME guide if GuideME is loaded (client-only, GuideME references client classes)
+            if (ModList.get().isLoaded("guideme")) {
+                AuroralGuide.init();
+            }
+
             AuroralClient.init(eventBus);
         }
-
-        // GuideME alpha targets snapshot, not release 26.1 - re-enable when updated
-        // if (ModList.get().isLoaded("guideme")) {
-        //     AuroralGuide.init();
-        // }
 
         LOGGER.info("Auroral initialized successfully!");
     }

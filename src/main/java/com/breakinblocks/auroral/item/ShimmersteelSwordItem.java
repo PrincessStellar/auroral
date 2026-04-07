@@ -36,7 +36,7 @@ public class ShimmersteelSwordItem extends Item {
     public static void placeSnowOnKill(Level level, BlockPos pos) {
         if (level instanceof ServerLevel) {
             // Only place snow if the space is air and the block below is solid
-            if (level.getBlockState(pos).isAir() && level.getBlockState(pos.below()).isSolid()) {
+            if (level.getBlockState(pos).isAir() && level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), net.minecraft.core.Direction.UP)) {
                 level.setBlock(pos, Blocks.SNOW.defaultBlockState(), 3);
             }
         }

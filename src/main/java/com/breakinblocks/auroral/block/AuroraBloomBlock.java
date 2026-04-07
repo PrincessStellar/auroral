@@ -64,7 +64,7 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
                state.is(Blocks.SNOW_BLOCK) ||
                state.is(Blocks.POWDER_SNOW) ||
                state.getBlock() instanceof ShimmeringIceBlock ||
-               state.isSolid();
+               state.isFaceSturdy(level, pos, net.minecraft.core.Direction.UP);
     }
 
     @Override
