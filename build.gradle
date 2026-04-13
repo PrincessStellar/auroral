@@ -85,15 +85,17 @@ repositories {
 
 dependencies {
     // JEI - Just Enough Items
-    compileOnly("mezz.jei:jei-26.1.1-neoforge-api:29.4.0.23")
-    runtimeOnly("mezz.jei:jei-26.1.1-neoforge:29.4.0.23")
+    compileOnly("mezz.jei:jei-26.1.2-neoforge-api:29.5.0.26")
+    runtimeOnly("mezz.jei:jei-26.1.2-neoforge:29.5.0.26")
 
     // Jade - Block info tooltips
     implementation("curse.maven:jade-324717:7815579")
 
     // GuideME - In-game guidebook (optional)
+    // NOTE: runtimeOnly temporarily disabled — GuideME's only published build requires
+    // Minecraft 1.21.11 and blocks datagen/runClient on 26.1.2. Re-enable when a
+    // 26.1.2-compatible GuideME build is published.
     compileOnly("curse.maven:guideme-1173950:7885779")
-    runtimeOnly("curse.maven:guideme-1173950:7885779")
 }
 
 tasks.withType(ProcessResources).configureEach {
@@ -147,7 +149,7 @@ publishing {
     }
 }
 
-// Mod publishing to CurseForge, Modrinth, and GitHub
+// Mod publishing to CurseForge and Modrinth (GitHub releases handled by CI)
 publishMods {
     file = jar.archiveFile
     def changelogFile = file("metadata/changelogs/${mod_version}.md")
@@ -168,15 +170,6 @@ publishMods {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         minecraftVersions.add(minecraft_version)
         optional("jei", "jade", "guideme")
-    }
-
-    def githubToken = providers.environmentVariable("GITHUB_TOKEN")
-    if (githubToken.isPresent()) {
-        github {
-            repository = "breakinblocks/auroral"
-            accessToken = githubToken
-            commitish = "main"
-        }
     }
 }
 

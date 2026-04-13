@@ -1,19 +1,11 @@
 package com.breakinblocks.auroral.block;
 
-import com.breakinblocks.auroral.registry.ModBlocks;
-import com.breakinblocks.auroral.util.AuroraHelper;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -25,26 +17,24 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
+public class EnderBloomBlock extends BushBlock implements BonemealableBlock {
 
-    public static final MapCodec<AuroraBloomBlock> CODEC = simpleCodec(AuroraBloomBlock::new);
+    public static final MapCodec<EnderBloomBlock> CODEC = simpleCodec(EnderBloomBlock::new);
 
     public static final int MAX_AGE = 3;
     public static final IntegerProperty AGE = BlockStateProperties.AGE_3;
 
-    // Shapes for each growth stage
     private static final VoxelShape[] SHAPES = new VoxelShape[] {
-        Block.box(5.0, 0.0, 5.0, 11.0, 4.0, 11.0),   // Stage 0 - tiny sprout
-        Block.box(4.0, 0.0, 4.0, 12.0, 7.0, 12.0),   // Stage 1 - small
-        Block.box(3.0, 0.0, 3.0, 13.0, 10.0, 13.0),  // Stage 2 - medium
-        Block.box(2.0, 0.0, 2.0, 14.0, 14.0, 14.0)   // Stage 3 - full bloom
+        Block.box(5.0, 0.0, 5.0, 11.0, 4.0, 11.0),
+        Block.box(4.0, 0.0, 4.0, 12.0, 7.0, 12.0),
+        Block.box(3.0, 0.0, 3.0, 13.0, 10.0, 13.0),
+        Block.box(2.0, 0.0, 2.0, 14.0, 14.0, 14.0)
     };
 
-    public AuroraBloomBlock(Properties properties) {
+    public EnderBloomBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(AGE, 0));
     }
@@ -67,13 +57,13 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState state, BlockGetter level, BlockPos pos) {
-        // Can be placed on snow, snow blocks, powder snow, Shimmering Ice,
-        // or any solid block (for when bloom replaces snow layers)
         return state.is(Blocks.SNOW) ||
                state.is(Blocks.SNOW_BLOCK) ||
                state.is(Blocks.POWDER_SNOW) ||
+               state.is(Blocks.END_STONE) ||
                state.getBlock() instanceof ShimmeringIceBlock ||
-               state.isFaceSturdy(level, pos, net.minecraft.core.Direction.UP);
+               state.getBlock() instanceof ShimmerSoilBlock ||
+               state.isFaceSturdy(level, pos, Direction.UP);
     }
 
     @Override
@@ -88,26 +78,22 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
 
     @Override
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        // Ender blooms persist forever — no daytime decay like aurora blooms.
         if (!canSurvive(state, level, pos)) {
             level.destroyBlock(pos, false);
             return;
         }
 
-        // Aurora Blooms wilt and disappear during daytime
-        if (!AuroraHelper.isNightTime(level)) {
-            // Spawn wilt particles before destroying
-            level.sendParticles(ParticleTypes.SNOWFLAKE,
-                pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-                5, 0.3, 0.3, 0.3, 0.01);
-            level.destroyBlock(pos, false);
-            return;
-        }
-
-        // Grow if not at max age (slow growth, ~5% chance per random tick)
-        if (!isMaxAge(state) && random.nextFloat() < 0.05f) {
+        // Growth only occurs on Shimmer Soil or End Stone.
+        if (!isMaxAge(state) && canGrowOn(level.getBlockState(pos.below()))
+                && random.nextFloat() < 0.05f) {
             int newAge = state.getValue(AGE) + 1;
             level.setBlock(pos, state.setValue(AGE, newAge), 2);
         }
+    }
+
+    private static boolean canGrowOn(BlockState below) {
+        return below.getBlock() instanceof ShimmerSoilBlock || below.is(Blocks.END_STONE);
     }
 
     @Override
@@ -119,7 +105,7 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
             double y = pos.getY() + 0.1 + (age * 0.15) + random.nextDouble() * 0.3;
             double z = pos.getZ() + 0.2 + random.nextDouble() * 0.6;
 
-            level.addParticle(ParticleTypes.END_ROD, x, y, z,
+            level.addParticle(ParticleTypes.PORTAL, x, y, z,
                 (random.nextDouble() - 0.5) * 0.02,
                 random.nextDouble() * 0.02,
                 (random.nextDouble() - 0.5) * 0.02);
@@ -129,46 +115,22 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
             double x = pos.getX() + random.nextDouble();
             double y = pos.getY() + 0.5 + (age * 0.2);
             double z = pos.getZ() + random.nextDouble();
-            level.addParticle(ParticleTypes.SNOWFLAKE, x, y, z, 0, -0.02, 0);
+            level.addParticle(ParticleTypes.REVERSE_PORTAL, x, y, z, 0, -0.02, 0);
         }
     }
 
     @Override
     public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
-        // Light increases with age: 3, 5, 6, 8
         return 3 + (state.getValue(AGE) * 2) - (state.getValue(AGE) > 2 ? 1 : 0);
     }
 
     @Override
-    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
-                                          Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (stack.is(Items.ENDER_PEARL)) {
-            if (!level.isClientSide()) {
-                int age = state.getValue(AGE);
-                BlockState newState = ModBlocks.ENDER_BLOOM.get().defaultBlockState()
-                    .setValue(EnderBloomBlock.AGE, age);
-                level.setBlock(pos, newState, Block.UPDATE_ALL);
-                level.playSound(null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0f, 1.0f);
-                ((ServerLevel) level).sendParticles(ParticleTypes.PORTAL,
-                    pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-                    20, 0.3, 0.3, 0.3, 0.0);
-                if (!player.getAbilities().instabuild) {
-                    stack.shrink(1);
-                }
-            }
-            return InteractionResult.SUCCESS;
-        }
-        return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
-    }
-
-    @Override
     public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state) {
-        return !isMaxAge(state);
+        return !isMaxAge(state) && canGrowOn(level.getBlockState(pos.below()));
     }
 
     @Override
     public boolean isBonemealSuccess(Level level, RandomSource random, BlockPos pos, BlockState state) {
-        // 75% chance of success
         return random.nextFloat() < 0.75f;
     }
 

@@ -55,6 +55,7 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(ModItems.WOVEN_LEATHER.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(ModItems.AURORA_SHARD.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(ModItems.FROZEN_PETALS.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ModItems.AURORA_ENDER_SHARD.get(), ModelTemplates.FLAT_ITEM);
 
         // Food items
         itemModels.generateFlatItem(ModItems.GLOW_LEEK.get(), ModelTemplates.FLAT_ITEM);
@@ -86,7 +87,12 @@ public class ModModelProvider extends ModelProvider {
         // Spawn eggs use static JSON files with minecraft:item/template_spawn_egg parent
 
         // Block items with flat models
-        blockModels.registerSimpleFlatItemModel(ModBlocks.AURORA_BLOOM.get());
+        // Both aurora_bloom and aurora_bloom_decorative share the stage3 texture
+        blockModels.registerSimpleFlatItemModel(ModBlocks.AURORA_BLOOM.get(), "_stage3");
+        Item decorativeBloomItem = ModBlocks.AURORA_BLOOM_DECORATIVE.get().asItem();
+        blockModels.registerSimpleItemModel(decorativeBloomItem,
+            blockModels.createFlatItemModelWithBlockTexture(decorativeBloomItem, ModBlocks.AURORA_BLOOM.get(), "_stage3"));
+        blockModels.registerSimpleFlatItemModel(ModBlocks.ENDER_BLOOM.get(), "_stage3");
         blockModels.registerSimpleFlatItemModel(ModBlocks.SNOW_ANGEL.get());
 
         // Note: Complex blocks with property variants (glacial_basin, hearthwood_log,

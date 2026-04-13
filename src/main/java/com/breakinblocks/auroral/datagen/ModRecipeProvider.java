@@ -259,8 +259,14 @@ public class ModRecipeProvider extends RecipeProvider {
             .unlockedBy("has_aurora_shard", has(ModItems.AURORA_SHARD.get()))
             .save(this.output);
 
-        // Ice from Snowballs: 8 snowballs around a water bucket = ice (bucket is returned)
-        ShapedRecipeBuilder.shaped(items, RecipeCategory.BUILDING_BLOCKS, Blocks.ICE)
+        // 2 Aurora Ender Shards -> 1 Ender Pearl
+        ShapelessRecipeBuilder.shapeless(items, RecipeCategory.MISC, Items.ENDER_PEARL)
+            .requires(ModItems.AURORA_ENDER_SHARD.get(), 2)
+            .unlockedBy("has_aurora_ender_shard", has(ModItems.AURORA_ENDER_SHARD.get()))
+            .save(this.output, Auroral.MOD_ID + ":ender_pearl_from_shards");
+
+        // Ice from Snowballs: 8 snowballs around a water bucket = 8 ice (bucket is returned)
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.BUILDING_BLOCKS, Blocks.ICE, 8)
             .pattern("SSS")
             .pattern("SWS")
             .pattern("SSS")

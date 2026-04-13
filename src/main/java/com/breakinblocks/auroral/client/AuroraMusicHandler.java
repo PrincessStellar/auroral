@@ -15,7 +15,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 /**
- * Client-side handler for Aurora music on the weather channel.
+ * Client-side handler for Aurora music on the music channel.
  * Plays ambient aurora music when the aurora is active and the player is in a cold biome.
  */
 @EventBusSubscriber(modid = Auroral.MOD_ID, value = Dist.CLIENT)
@@ -91,7 +91,7 @@ public class AuroraMusicHandler {
         private boolean fadingOut = false;
 
         protected AuroraMusicSoundInstance() {
-            super(ModSounds.AURORA_MUSIC.get(), SoundSource.WEATHER, SoundInstance.createUnseededRandom());
+            super(ModSounds.AURORA_MUSIC.get(), SoundSource.MUSIC, SoundInstance.createUnseededRandom());
             this.looping = true;
             this.delay = 0;
             this.volume = 0.0f; // Start silent for fade-in

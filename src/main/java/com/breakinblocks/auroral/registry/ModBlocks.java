@@ -2,6 +2,7 @@ package com.breakinblocks.auroral.registry;
 
 import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.block.*;
+import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -64,6 +65,33 @@ public class ModBlocks {
             .sound(SoundType.GRASS)
             .pushReaction(PushReaction.DESTROY)
             .randomTicks()
+        ));
+
+    public static final DeferredBlock<EnderBloomBlock> ENDER_BLOOM = BLOCKS.registerBlock("ender_bloom",
+        props -> new EnderBloomBlock(props
+            .mapColor(MapColor.COLOR_PURPLE)
+            .noCollision()
+            .instabreak()
+            .sound(SoundType.GRASS)
+            .pushReaction(PushReaction.DESTROY)
+            .randomTicks()
+        ));
+
+    public static final DeferredBlock<AuroraBloomDecorativeBlock> AURORA_BLOOM_DECORATIVE = BLOCKS.registerBlock("aurora_bloom_decorative",
+        props -> new AuroraBloomDecorativeBlock(props
+            .mapColor(MapColor.SNOW)
+            .noCollision()
+            .instabreak()
+            .sound(SoundType.GRASS)
+            .pushReaction(PushReaction.DESTROY)
+            .lightLevel(state -> 8)
+        ));
+
+    public static final DeferredBlock<FlowerPotBlock> POTTED_AURORA_BLOOM_DECORATIVE = BLOCKS.registerBlock("potted_aurora_bloom_decorative",
+        props -> new FlowerPotBlock(AURORA_BLOOM_DECORATIVE.get(), props
+            .instabreak()
+            .noOcclusion()
+            .lightLevel(state -> 8)
         ));
 
     public static final DeferredBlock<AuroraLanternBlock> AURORA_LANTERN = BLOCKS.registerBlock("aurora_lantern",

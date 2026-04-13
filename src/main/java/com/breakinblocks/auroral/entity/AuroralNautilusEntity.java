@@ -595,7 +595,7 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
 
     @Override
     public SoundSource getSoundSource() {
-        return SoundSource.AMBIENT;
+        return SoundSource.NEUTRAL;
     }
 
     @Override

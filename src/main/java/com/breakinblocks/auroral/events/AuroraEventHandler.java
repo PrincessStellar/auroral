@@ -173,7 +173,7 @@ public class AuroraEventHandler {
 
             // Play custom nautilus spawn sound
             level.playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                ModSounds.NAUTILUS_SPAWN.get(), SoundSource.AMBIENT, 0.8F, 1.0F);
+                ModSounds.NAUTILUS_SPAWN.get(), SoundSource.NEUTRAL, 0.8F, 1.0F);
 
             Auroral.LOGGER.debug("Spawned Auroral Nautilus at ({}, {}, {})",
                 pos.getX(), pos.getY(), pos.getZ());

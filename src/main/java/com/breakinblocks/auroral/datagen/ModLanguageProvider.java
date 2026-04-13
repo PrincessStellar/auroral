@@ -26,6 +26,9 @@ public class ModLanguageProvider extends LanguageProvider {
         addBlock(ModBlocks.HEARTHWOOD_LOG, "Hearthwood Log");
         addBlock(ModBlocks.SHIMMERING_ICE, "Shimmering Ice");
         addBlock(ModBlocks.AURORA_BLOOM, "Aurora Bloom");
+        addBlock(ModBlocks.AURORA_BLOOM_DECORATIVE, "Aurora Bloom");
+        addBlock(ModBlocks.POTTED_AURORA_BLOOM_DECORATIVE, "Aurora Bloom");
+        addBlock(ModBlocks.ENDER_BLOOM, "Ender Bloom");
         addBlock(ModBlocks.GLOW_LEEK, "Glow-Leek");
         addBlock(ModBlocks.AURORA_LANTERN, "Aurora Lantern");
         addBlock(ModBlocks.SNOW_ANGEL, "Snow Angel");
@@ -38,6 +41,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.WOVEN_LEATHER, "Woven Leather");
         addItem(ModItems.AURORA_SHARD, "Aurora Shard");
         addItem(ModItems.FROZEN_PETALS, "Frozen Petals");
+        addItem(ModItems.AURORA_ENDER_SHARD, "Aurora Ender Shard");
 
         // Items - Shimmersteel Tools
         addItem(ModItems.SHIMMERSTEEL_PICKAXE, "Shimmersteel Pickaxe");

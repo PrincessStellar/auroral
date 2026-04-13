@@ -24,6 +24,8 @@ public class ModItems {
     public static final DeferredItem<BlockItem> HEARTHWOOD_LOG_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.HEARTHWOOD_LOG);
     public static final DeferredItem<BlockItem> SHIMMERING_ICE_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.SHIMMERING_ICE);
     public static final DeferredItem<BlockItem> AURORA_BLOOM_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.AURORA_BLOOM);
+    public static final DeferredItem<BlockItem> AURORA_BLOOM_DECORATIVE_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.AURORA_BLOOM_DECORATIVE);
+    public static final DeferredItem<BlockItem> ENDER_BLOOM_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.ENDER_BLOOM);
     public static final DeferredItem<BlockItem> AURORA_LANTERN_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.AURORA_LANTERN);
     public static final DeferredItem<BlockItem> SNOW_ANGEL_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.SNOW_ANGEL);
     public static final DeferredItem<BlockItem> SHIMMER_SOIL_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.SHIMMER_SOIL);
@@ -35,6 +37,7 @@ public class ModItems {
     public static final DeferredItem<Item> WOVEN_LEATHER = ITEMS.registerSimpleItem("woven_leather");
     public static final DeferredItem<Item> AURORA_SHARD = ITEMS.registerSimpleItem("aurora_shard");
     public static final DeferredItem<Item> FROZEN_PETALS = ITEMS.registerSimpleItem("frozen_petals");
+    public static final DeferredItem<Item> AURORA_ENDER_SHARD = ITEMS.registerSimpleItem("aurora_ender_shard");
 
     public static final DeferredItem<SmithingTemplateItem> SHIMMERSTEEL_UPGRADE_SMITHING_TEMPLATE = ITEMS.registerItem(
         "shimmersteel_upgrade_smithing_template",

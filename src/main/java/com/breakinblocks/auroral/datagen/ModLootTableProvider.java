@@ -22,6 +22,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePrope
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import com.breakinblocks.auroral.block.AuroraBloomBlock;
+import com.breakinblocks.auroral.block.EnderBloomBlock;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.enchantment.Enchantments;
 
@@ -57,18 +58,41 @@ public class ModLootTableProvider extends LootTableProvider {
             dropSelf(ModBlocks.COLD_BREWING_STAND.get());
             dropSelf(ModBlocks.HEARTHWOOD_LOG.get());
             dropSelf(ModBlocks.SHIMMERING_ICE.get());
+            dropSelf(ModBlocks.AURORA_BLOOM_DECORATIVE.get());
 
-            // Aurora Bloom drops Frozen Petals (1-4 with fortune) when fully grown (age=3)
-            // Harvesting early yields nothing
+            // Potted decorative aurora bloom drops the pot and the decorative bloom
+            add(ModBlocks.POTTED_AURORA_BLOOM_DECORATIVE.get(),
+                createPotFlowerItemTable(ModBlocks.AURORA_BLOOM_DECORATIVE.get()));
+
+            // Aurora Bloom: silk-touch at max age yields decorative variant; otherwise
+            // fully grown blooms drop Frozen Petals (1-4 with fortune). Harvesting early yields nothing.
             var fortuneEnchant = this.registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE);
             add(ModBlocks.AURORA_BLOOM.get(), LootTable.lootTable()
                 .withPool(LootPool.lootPool()
                     .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(ModBlocks.AURORA_BLOOM.get())
                         .setProperties(StatePropertiesPredicate.Builder.properties()
                             .hasProperty(AuroraBloomBlock.AGE, AuroraBloomBlock.MAX_AGE)))
+                    .when(this.hasSilkTouch())
+                    .add(LootItem.lootTableItem(ModBlocks.AURORA_BLOOM_DECORATIVE.get())))
+                .withPool(LootPool.lootPool()
+                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(ModBlocks.AURORA_BLOOM.get())
+                        .setProperties(StatePropertiesPredicate.Builder.properties()
+                            .hasProperty(AuroraBloomBlock.AGE, AuroraBloomBlock.MAX_AGE)))
+                    .when(this.doesNotHaveSilkTouch())
                     .add(LootItem.lootTableItem(ModItems.FROZEN_PETALS.get())
                         .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0f)))
                         .apply(ApplyBonusCount.addUniformBonusCount(fortuneEnchant, 1)))
+                ));
+
+            // Ender Bloom always drops itself (stage 0 on placement), plus an Aurora Ender Shard when fully grown
+            add(ModBlocks.ENDER_BLOOM.get(), LootTable.lootTable()
+                .withPool(LootPool.lootPool()
+                    .add(LootItem.lootTableItem(ModBlocks.ENDER_BLOOM.get())))
+                .withPool(LootPool.lootPool()
+                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(ModBlocks.ENDER_BLOOM.get())
+                        .setProperties(StatePropertiesPredicate.Builder.properties()
+                            .hasProperty(EnderBloomBlock.AGE, EnderBloomBlock.MAX_AGE)))
+                    .add(LootItem.lootTableItem(ModItems.AURORA_ENDER_SHARD.get()))
                 ));
 
             // Glow-Leek drops itself when mature, seeds otherwise
@@ -84,6 +108,9 @@ public class ModLootTableProvider extends LootTableProvider {
                 ModBlocks.HEARTHWOOD_LOG.get(),
                 ModBlocks.SHIMMERING_ICE.get(),
                 ModBlocks.AURORA_BLOOM.get(),
+                ModBlocks.AURORA_BLOOM_DECORATIVE.get(),
+                ModBlocks.POTTED_AURORA_BLOOM_DECORATIVE.get(),
+                ModBlocks.ENDER_BLOOM.get(),
                 ModBlocks.GLOW_LEEK.get()
             );
         }
