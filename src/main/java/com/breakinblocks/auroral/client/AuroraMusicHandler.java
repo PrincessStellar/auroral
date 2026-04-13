@@ -16,13 +16,15 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 /**
  * Client-side handler for Aurora music on the music channel.
- * Plays ambient aurora music when the aurora is active and the player is in a cold biome.
+ * Plays the aurora music track once per aurora event (not looped).
  */
 @EventBusSubscriber(modid = Auroral.MOD_ID, value = Dist.CLIENT)
 public class AuroraMusicHandler {
 
     private static AuroraMusicSoundInstance currentMusic = null;
     private static boolean wasPlaying = false;
+    private static boolean hasPlayedThisAurora = false;
+    private static boolean auroraWasActive = false;
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
@@ -30,29 +32,32 @@ public class AuroraMusicHandler {
             return;
         }
 
-        // Only check every 20 ticks (1 second) to reduce overhead
         if (player.tickCount % 20 != 0) {
             return;
         }
 
+        boolean auroraActive = ClientAuroraState.isAuroraActive();
+        if (auroraWasActive && !auroraActive) {
+            // Aurora ended — reset so the next aurora plays the track again.
+            hasPlayedThisAurora = false;
+            stopMusic();
+        }
+        auroraWasActive = auroraActive;
+
         Level level = player.level();
-        boolean shouldPlay = ClientAuroraState.isAuroraActive()
+        boolean shouldPlay = auroraActive
             && BiomeHelper.isColdBiome(level, player.blockPosition())
             && level.canSeeSky(player.blockPosition());
 
-        if (shouldPlay && !wasPlaying) {
-            // Start aurora music
+        if (shouldPlay && !wasPlaying && !hasPlayedThisAurora) {
             startMusic();
-        } else if (!shouldPlay && wasPlaying) {
-            // Stop aurora music
-            stopMusic();
+            hasPlayedThisAurora = true;
         }
     }
 
     private static void startMusic() {
         Minecraft mc = Minecraft.getInstance();
         if (currentMusic == null || !mc.getSoundManager().isActive(currentMusic)) {
-            // Stop vanilla music so it doesn't play over the aurora music
             mc.getMusicManager().stopPlaying();
 
             currentMusic = new AuroraMusicSoundInstance();
@@ -78,38 +83,43 @@ public class AuroraMusicHandler {
             Minecraft.getInstance().getSoundManager().stop(currentMusic);
             currentMusic = null;
             wasPlaying = false;
+            hasPlayedThisAurora = false;
+            auroraWasActive = false;
         }
     }
 
     /**
      * Custom sound instance for aurora music with fade-in/fade-out support.
+     * Plays once (no looping); max volume is capped at half.
      */
     private static class AuroraMusicSoundInstance extends AbstractTickableSoundInstance {
-        private static final int FADE_TICKS = 60; // 3 seconds
+        private static final int FADE_TICKS = 60;
+        private static final float MAX_VOLUME = 0.5f;
+
         private int fadeCounter = 0;
         private boolean fadingIn = true;
         private boolean fadingOut = false;
 
         protected AuroraMusicSoundInstance() {
             super(ModSounds.AURORA_MUSIC.get(), SoundSource.MUSIC, SoundInstance.createUnseededRandom());
-            this.looping = true;
+            this.looping = false;
             this.delay = 0;
-            this.volume = 0.0f; // Start silent for fade-in
-            this.relative = true; // Plays relative to player
+            this.volume = 0.0f;
+            this.relative = true;
         }
 
         @Override
         public void tick() {
             if (fadingIn) {
                 fadeCounter++;
-                this.volume = Math.min(1.0f, fadeCounter / (float) FADE_TICKS);
+                this.volume = (fadeCounter / (float) FADE_TICKS) * MAX_VOLUME;
                 if (fadeCounter >= FADE_TICKS) {
                     fadingIn = false;
-                    this.volume = 1.0f;
+                    this.volume = MAX_VOLUME;
                 }
             } else if (fadingOut) {
                 fadeCounter--;
-                this.volume = Math.max(0.0f, fadeCounter / (float) FADE_TICKS);
+                this.volume = Math.max(0.0f, (fadeCounter / (float) FADE_TICKS) * MAX_VOLUME);
                 if (fadeCounter <= 0) {
                     this.stop();
                 }
@@ -120,8 +130,7 @@ public class AuroraMusicHandler {
             if (!fadingOut) {
                 fadingOut = true;
                 fadingIn = false;
-                // Start fade from current position
-                fadeCounter = (int) (volume * FADE_TICKS);
+                fadeCounter = (int) ((volume / MAX_VOLUME) * FADE_TICKS);
             }
         }
 
