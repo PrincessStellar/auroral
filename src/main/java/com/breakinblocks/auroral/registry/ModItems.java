@@ -23,7 +23,8 @@ public class ModItems {
     public static final DeferredItem<BlockItem> COLD_BREWING_STAND_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.COLD_BREWING_STAND);
     public static final DeferredItem<BlockItem> HEARTHWOOD_LOG_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.HEARTHWOOD_LOG);
     public static final DeferredItem<BlockItem> SHIMMERING_ICE_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.SHIMMERING_ICE);
-    public static final DeferredItem<BlockItem> AURORA_BLOOM_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.AURORA_BLOOM);
+    public static final DeferredItem<AuroraBloomItem> AURORA_BLOOM_ITEM = ITEMS.registerItem("aurora_bloom",
+        properties -> new AuroraBloomItem(ModBlocks.AURORA_BLOOM.get(), properties));
     public static final DeferredItem<BlockItem> AURORA_BLOOM_DECORATIVE_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.AURORA_BLOOM_DECORATIVE);
     public static final DeferredItem<BlockItem> ENDER_BLOOM_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.ENDER_BLOOM);
     public static final DeferredItem<BlockItem> AURORA_LANTERN_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.AURORA_LANTERN);

@@ -80,6 +80,15 @@ public class GlacialBasinBlock extends BaseEntityBlock {
         return RenderShape.MODEL;
     }
 
+    @Override
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        // Run before removal so the BE is still attached to read its inventory.
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof GlacialBasinBlockEntity basin) {
+            basin.dropContents(level, pos);
+        }
+        return super.playerWillDestroy(level, pos, state, player);
+    }
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
@@ -134,6 +143,14 @@ public class GlacialBasinBlock extends BaseEntityBlock {
         }
 
         if (stack.isEmpty()) {
+            if (player.isShiftKeyDown() && basin.hasOutput()) {
+                ItemStack pulled = basin.takeOutput();
+                if (!player.getInventory().add(pulled)) {
+                    player.drop(pulled, false);
+                }
+                level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, 1.5F);
+                return InteractionResult.SUCCESS;
+            }
             player.sendOverlayMessage(
                 Component.translatable("block.auroral.glacial_basin.aura_level", auraLevel, 3)
             );

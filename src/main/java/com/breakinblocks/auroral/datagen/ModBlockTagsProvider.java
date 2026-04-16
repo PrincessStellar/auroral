@@ -21,12 +21,13 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        // Glacial Basin is mineable with pickaxe
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .add(ModBlocks.GLACIAL_BASIN.get());
 
-        // Requires stone tool or better
         tag(BlockTags.NEEDS_STONE_TOOL)
             .add(ModBlocks.GLACIAL_BASIN.get());
+
+        tag(BlockTags.REPLACEABLE)
+            .add(ModBlocks.SNOW_ANGEL.get());
     }
 }

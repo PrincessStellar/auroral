@@ -1,6 +1,7 @@
 package com.breakinblocks.auroral.events;
 
 import com.breakinblocks.auroral.Auroral;
+import com.breakinblocks.auroral.block.AuroraBloomBlock;
 import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.entity.AuroralNautilusEntity;
 import com.breakinblocks.auroral.net.AuroralNetworking;
@@ -19,10 +20,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.util.BlockSnapshot;
+import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 import java.util.Map;
@@ -202,17 +207,14 @@ public class AuroraEventHandler {
         RandomSource random = level.getRandom();
 
         for (ServerPlayer player : level.players()) {
-            // Only spawn near players in cold biomes
             if (!BiomeHelper.isColdBiome(level, player.blockPosition())) {
                 continue;
             }
 
-            // Random chance to spawn
             if (random.nextDouble() > BLOOM_SPAWN_CHANCE) {
                 continue;
             }
 
-            // Try to find a valid spawn position near the player
             BlockPos playerPos = player.blockPosition();
             int attempts = 5;
 
@@ -221,24 +223,38 @@ public class AuroraEventHandler {
                 int offsetZ = random.nextInt(32) - 16;
                 BlockPos checkPos = playerPos.offset(offsetX, 0, offsetZ);
 
-                // Find surface
                 BlockPos surfacePos = findSurfaceSnow(level, checkPos);
-                if (surfacePos != null && canPlaceBloom(level, surfacePos)) {
-                    BlockState surfaceState = level.getBlockState(surfacePos);
+                if (surfacePos == null || !canPlaceBloom(level, surfacePos)) {
+                    continue;
+                }
 
-                    // If it's a snow layer, replace it with the bloom
-                    if (SnowBlockHelper.isSnowLayer(surfaceState)) {
-                        level.setBlock(surfacePos, ModBlocks.AURORA_BLOOM.get().defaultBlockState(), 3);
-                        trackBloomPosition(level, surfacePos);
+                BlockState surfaceState = level.getBlockState(surfacePos);
+
+                if (SnowBlockHelper.isSnowLayer(surfaceState)) {
+                    // Require a valid surface under the snow so the restored snow layer
+                    // (when the bloom dies) doesn't end up sitting on stone or dirt.
+                    BlockPos belowPos = surfacePos.below();
+                    if (!SnowBlockHelper.isBloomSurface(level.getBlockState(belowPos))) {
+                        continue;
+                    }
+                    BlockState bloom = ModBlocks.AURORA_BLOOM.get().defaultBlockState()
+                        .setValue(AuroraBloomBlock.SNOW_LOGGED, true)
+                        .setValue(AuroraBloomBlock.SNOW_LOGGED_LAYER, true);
+                    if (tryPlaceBloom(level, surfacePos, bloom, player)) {
                         break;
-                    } else {
-                        // For snow blocks, powder snow, or shimmering ice, place above
-                        BlockPos bloomPos = surfacePos.above();
-                        if (level.isEmptyBlock(bloomPos)) {
-                            level.setBlock(bloomPos, ModBlocks.AURORA_BLOOM.get().defaultBlockState(), 3);
-                            trackBloomPosition(level, bloomPos);
-                            break;
-                        }
+                    }
+                } else if (surfaceState.is(Blocks.POWDER_SNOW)) {
+                    BlockState bloom = ModBlocks.AURORA_BLOOM.get().defaultBlockState()
+                        .setValue(AuroraBloomBlock.SNOW_LOGGED, true);
+                    if (tryPlaceBloom(level, surfacePos, bloom, player)) {
+                        break;
+                    }
+                } else {
+                    BlockPos bloomPos = surfacePos.above();
+                    if (level.isEmptyBlock(bloomPos)
+                            && tryPlaceBloom(level, bloomPos,
+                                ModBlocks.AURORA_BLOOM.get().defaultBlockState(), player)) {
+                        break;
                     }
                 }
             }
@@ -246,11 +262,31 @@ public class AuroraEventHandler {
     }
 
     /**
-     * Finds a snow surface block at or near the given position.
+     * Places a bloom while firing the block-place event so claim-protection mods
+     * (e.g. FTB Chunks) can veto the placement. The nearby player is supplied as
+     * the placing entity so protection mods have a subject to authorize against.
+     */
+    private static boolean tryPlaceBloom(ServerLevel level, BlockPos pos, BlockState bloom, ServerPlayer player) {
+        BlockSnapshot snapshot = BlockSnapshot.create(level.dimension(), level, pos);
+        if (!level.setBlock(pos, bloom, 3)) {
+            return false;
+        }
+        if (EventHooks.onBlockPlace(player, snapshot, Direction.UP)) {
+            snapshot.restore();
+            return false;
+        }
+        trackBloomPosition(level, pos);
+        return true;
+    }
+
+    /**
+     * Finds the topmost snow/ice surface block in the column near the given position.
+     * Scanning top-down picks the snow layer over the snow block beneath it, so the
+     * snow-layer branch handles the placement instead of the place-above branch
+     * tripping on the snow layer.
      */
     private static BlockPos findSurfaceSnow(ServerLevel level, BlockPos pos) {
-        // Search from player Y up and down
-        for (int y = -10; y <= 10; y++) {
+        for (int y = 10; y >= -10; y--) {
             BlockPos checkPos = pos.offset(0, y, 0);
             BlockState state = level.getBlockState(checkPos);
             if (isValidBloomSurface(state)) {

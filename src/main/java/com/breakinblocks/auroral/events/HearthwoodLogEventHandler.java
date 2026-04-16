@@ -8,6 +8,7 @@ import com.breakinblocks.auroral.registry.ModEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -17,6 +18,7 @@ import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 
 @EventBusSubscriber(modid = Auroral.MOD_ID)
@@ -25,6 +27,17 @@ public class HearthwoodLogEventHandler {
     private static final double VILLAGER_DISCOUNT_RADIUS = 16.0;
 
     public static final float HEARTHWOOD_LOG_DISCOUNT = 0.8f;
+
+    @SubscribeEvent
+    public static void onPhantomChangeTarget(LivingChangeTargetEvent event) {
+        if (!(event.getEntity() instanceof Phantom)) {
+            return;
+        }
+        LivingEntity newTarget = event.getNewAboutToBeSetTarget();
+        if (newTarget instanceof Player player && player.hasEffect(ModEffects.FROSTBITE_IMMUNITY)) {
+            event.setCanceled(true);
+        }
+    }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onMobEffectApplicable(MobEffectEvent.Applicable event) {

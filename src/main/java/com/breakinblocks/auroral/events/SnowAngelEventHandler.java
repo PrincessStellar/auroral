@@ -29,11 +29,11 @@ public class SnowAngelEventHandler {
             return;
         }
 
-        if (!player.getMainHandItem().isEmpty()) {
+        if (event.getHand() != InteractionHand.MAIN_HAND) {
             return;
         }
 
-        if (event.getHand() != InteractionHand.MAIN_HAND) {
+        if (!player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty()) {
             return;
         }
 

@@ -2,7 +2,9 @@ package com.breakinblocks.auroral.util;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.tags.BiomeTags;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 
@@ -11,31 +13,22 @@ import net.minecraft.world.level.biome.Biome;
  */
 public class BiomeHelper {
 
+    private static final TagKey<Biome> IS_COLD = TagKey.create(
+        Registries.BIOME,
+        Identifier.fromNamespaceAndPath("c", "is_cold")
+    );
+
     /**
      * Checks if the biome at the given position is considered "cold" for aurora purposes.
-     * Cold biomes include snowy biomes and any biome where it snows.
+     * Uses the common {@code c:is_cold} biome tag as the sole criterion.
      *
      * @param level The level to check
      * @param pos The position to check
-     * @return true if the biome is cold
+     * @return true if the biome is tagged {@code c:is_cold}
      */
     public static boolean isColdBiome(Level level, BlockPos pos) {
         Holder<Biome> biomeHolder = level.getBiome(pos);
-        Biome biome = biomeHolder.value();
-
-        // Check if tagged as snowy (IS_SNOWY tag marks snowy biomes)
-        if (biomeHolder.is(BiomeTags.IS_TAIGA) || biomeHolder.is(BiomeTags.IS_MOUNTAIN)) {
-            return true;
-        }
-
-        // Check if the biome has cold enough temperature for snow
-        // In 1.21.11, coldEnoughToSnow takes BlockPos and sea level
-        int seaLevel = level.getSeaLevel();
-        if (biome.coldEnoughToSnow(pos, seaLevel)) {
-            return true;
-        }
-
-        return false;
+        return biomeHolder.is(IS_COLD);
     }
 
     /**

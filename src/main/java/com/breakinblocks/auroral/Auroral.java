@@ -5,6 +5,7 @@ import com.breakinblocks.auroral.client.AuroralClient;
 import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.registry.ModBlockEntities;
 import com.breakinblocks.auroral.registry.ModBlocks;
+import com.breakinblocks.auroral.registry.ModCapabilities;
 import com.breakinblocks.auroral.registry.ModCreativeTabs;
 import com.breakinblocks.auroral.registry.ModDataAttachments;
 import com.breakinblocks.auroral.registry.ModEffects;
@@ -16,6 +17,7 @@ import com.breakinblocks.auroral.registry.ModSounds;
 import com.breakinblocks.auroral.events.EntityEventHandler;
 import com.breakinblocks.auroral.events.ItemEventHandler;
 import com.breakinblocks.auroral.integration.guideme.AuroralGuide;
+import com.breakinblocks.auroral.integration.jade.JadeCompat;
 import com.breakinblocks.auroral.net.AuroralNetworking;
 import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
@@ -58,6 +60,13 @@ public class Auroral {
 
         // Register network payloads
         AuroralNetworking.register(eventBus);
+
+        // Register block entity capabilities
+        ModCapabilities.register(eventBus);
+
+        if (ModList.get().isLoaded("jade")) {
+            JadeCompat.register(eventBus);
+        }
 
         // Register configs
         container.registerConfig(ModConfig.Type.STARTUP, AuroralConfig.startupSpec);

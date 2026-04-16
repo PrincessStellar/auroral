@@ -39,13 +39,6 @@ neoForge {
                 '--output', file('src/generated/resources/').absolutePath,
                 '--existing', file('src/main/resources/').absolutePath)
         }
-
-        serverData {
-            serverData()
-            programArguments.addAll('--mod', project.mod_id, '--all',
-                '--output', file('src/generated/resources/').absolutePath,
-                '--existing', file('src/main/resources/').absolutePath)
-        }
     }
 
     mods {
@@ -58,6 +51,7 @@ neoForge {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    mavenCentral()
     maven {
         name = "Jared's Maven"
         url = "https://maven.blamejared.com/"
@@ -92,10 +86,7 @@ dependencies {
     implementation("curse.maven:jade-324717:7815579")
 
     // GuideME - In-game guidebook (optional)
-    // NOTE: runtimeOnly temporarily disabled — GuideME's only published build requires
-    // Minecraft 1.21.11 and blocks datagen/runClient on 26.1.2. Re-enable when a
-    // 26.1.2-compatible GuideME build is published.
-    compileOnly("curse.maven:guideme-1173950:7885779")
+    implementation("org.appliedenergistics:guideme:${guideme_version}")
 }
 
 tasks.withType(ProcessResources).configureEach {

@@ -2,19 +2,33 @@ package com.breakinblocks.auroral.events;
 
 import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.config.AuroralConfig;
+import com.breakinblocks.auroral.entity.AuroralNautilusEntity;
 import com.breakinblocks.auroral.net.AuroralNetworking;
 import com.breakinblocks.auroral.registry.ModBlocks;
+import com.breakinblocks.auroral.registry.ModEntities;
 import com.breakinblocks.auroral.registry.ModTags;
 import com.breakinblocks.auroral.util.AuroraHelper;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @EventBusSubscriber(modid = Auroral.MOD_ID)
 public class PlayerEventHandler {
@@ -27,10 +41,55 @@ public class PlayerEventHandler {
         }
     }
 
+    /** Position of each player just before a dimension change, so we can find pets nearby. */
+    private static final Map<UUID, Vec3> preTransitPositions = new HashMap<>();
+    private static final double NAUTILUS_FOLLOW_RADIUS = 32.0;
+
+    @SubscribeEvent
+    public static void onEntityTravelToDimension(EntityTravelToDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            preTransitPositions.put(player.getUUID(), player.position());
+        }
+    }
+
     @SubscribeEvent
     public static void onPlayerChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             AuroralNetworking.syncAuroraToPlayer(player);
+            bringTamedNautili(player, event.getFrom());
+            preTransitPositions.remove(player.getUUID());
+        }
+    }
+
+    private static void bringTamedNautili(ServerPlayer player, ResourceKey<Level> fromKey) {
+        MinecraftServer server = player.level().getServer();
+        if (server == null) return;
+        ServerLevel sourceLevel = server.getLevel(fromKey);
+        ServerLevel destLevel = player.level();
+        if (sourceLevel == null || sourceLevel == destLevel) return;
+
+        UUID playerId = player.getUUID();
+        Vec3 lastPos = preTransitPositions.get(playerId);
+        double radiusSq = NAUTILUS_FOLLOW_RADIUS * NAUTILUS_FOLLOW_RADIUS;
+
+        List<? extends AuroralNautilusEntity> followers = sourceLevel.getEntities(
+            ModEntities.AURORAL_NAUTILUS.get(),
+            n -> n.isTamed()
+                && playerId.equals(n.getOwnerUUID())
+                && (lastPos == null || n.position().distanceToSqr(lastPos) <= radiusSq)
+        );
+
+        for (AuroralNautilusEntity nautilus : followers) {
+            nautilus.stopRiding();
+            nautilus.ejectPassengers();
+            nautilus.teleport(new TeleportTransition(
+                destLevel,
+                player.position(),
+                Vec3.ZERO,
+                player.getYRot(),
+                player.getXRot(),
+                TeleportTransition.DO_NOTHING
+            ));
         }
     }
 

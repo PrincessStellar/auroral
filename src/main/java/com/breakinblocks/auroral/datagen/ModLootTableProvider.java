@@ -19,6 +19,7 @@ import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import com.breakinblocks.auroral.block.AuroraBloomBlock;
@@ -81,10 +82,24 @@ public class ModLootTableProvider extends LootTableProvider {
                     .when(this.doesNotHaveSilkTouch())
                     .add(LootItem.lootTableItem(ModItems.FROZEN_PETALS.get())
                         .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0f)))
-                        .apply(ApplyBonusCount.addUniformBonusCount(fortuneEnchant, 1)))
-                ));
+                        .apply(ApplyBonusCount.addUniformBonusCount(fortuneEnchant, 1))))
+                .withPool(LootPool.lootPool()
+                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(ModBlocks.AURORA_BLOOM.get())
+                        .setProperties(StatePropertiesPredicate.Builder.properties()
+                            .hasProperty(AuroraBloomBlock.AGE, AuroraBloomBlock.MAX_AGE)))
+                    .when(this.doesNotHaveSilkTouch())
+                    .add(LootItem.lootTableItem(ModBlocks.AURORA_BLOOM.get())))
+                .withPool(LootPool.lootPool()
+                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(ModBlocks.AURORA_BLOOM.get())
+                        .setProperties(StatePropertiesPredicate.Builder.properties()
+                            .hasProperty(AuroraBloomBlock.AGE, AuroraBloomBlock.MAX_AGE)))
+                    .when(this.doesNotHaveSilkTouch())
+                    .when(LootItemRandomChanceCondition.randomChance(0.15f))
+                    .add(LootItem.lootTableItem(ModBlocks.AURORA_BLOOM.get())))
+                );
 
             // Ender Bloom always drops itself (stage 0 on placement), plus an Aurora Ender Shard when fully grown
+            // and a 5% chance for an additional Ender Bloom at full growth.
             add(ModBlocks.ENDER_BLOOM.get(), LootTable.lootTable()
                 .withPool(LootPool.lootPool()
                     .add(LootItem.lootTableItem(ModBlocks.ENDER_BLOOM.get())))
@@ -92,7 +107,13 @@ public class ModLootTableProvider extends LootTableProvider {
                     .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(ModBlocks.ENDER_BLOOM.get())
                         .setProperties(StatePropertiesPredicate.Builder.properties()
                             .hasProperty(EnderBloomBlock.AGE, EnderBloomBlock.MAX_AGE)))
-                    .add(LootItem.lootTableItem(ModItems.AURORA_ENDER_SHARD.get()))
+                    .add(LootItem.lootTableItem(ModItems.AURORA_ENDER_SHARD.get())))
+                .withPool(LootPool.lootPool()
+                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(ModBlocks.ENDER_BLOOM.get())
+                        .setProperties(StatePropertiesPredicate.Builder.properties()
+                            .hasProperty(EnderBloomBlock.AGE, EnderBloomBlock.MAX_AGE)))
+                    .when(LootItemRandomChanceCondition.randomChance(0.05f))
+                    .add(LootItem.lootTableItem(ModBlocks.ENDER_BLOOM.get()))
                 ));
 
             // Glow-Leek drops itself when mature, seeds otherwise
