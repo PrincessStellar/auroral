@@ -4,14 +4,21 @@ import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.client.footprint.SnowFootprintManager;
 import com.breakinblocks.auroral.client.footprint.SnowFootprintRenderer;
 import com.breakinblocks.auroral.client.gui.ColdBrewingStandScreen;
+import com.breakinblocks.auroral.client.model.AuroralNautilusArmorModel;
 import com.breakinblocks.auroral.client.model.AuroralNautilusModel;
 import com.breakinblocks.auroral.client.particle.AuroraSparkleParticle;
 import com.breakinblocks.auroral.client.particle.ShimmerParticle;
 import com.breakinblocks.auroral.client.renderer.AuroralNautilusRenderer;
 import com.breakinblocks.auroral.client.renderer.AuroralSnowletteRenderer;
 import com.breakinblocks.auroral.client.renderer.AuroraSkyRenderer;
+import com.breakinblocks.auroral.client.renderer.ShimmerweaveVisorLayer;
 import com.breakinblocks.auroral.client.renderer.StarShotRenderer;
 import com.breakinblocks.auroral.client.renderer.ThrownShimmerSpearRenderer;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.world.entity.EntityType;
 import com.breakinblocks.auroral.registry.ModEntities;
 import com.breakinblocks.auroral.registry.ModMenuTypes;
 import com.breakinblocks.auroral.registry.ModParticles;
@@ -32,12 +39,36 @@ public class AuroralClient {
         eventBus.addListener(AuroralClient::registerRenderers);
         eventBus.addListener(AuroralClient::registerParticleProviders);
         eventBus.addListener(AuroralClient::registerMenuScreens);
+        eventBus.addListener(AuroralClient::addEntityLayers);
 
         Auroral.LOGGER.debug("Auroral client initialized");
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void addEntityLayers(EntityRenderersEvent.AddLayers event) {
+        var modelSet = event.getContext().getModelSet();
+        for (var skin : event.getSkins()) {
+            AvatarRenderer<?> playerRenderer = event.getPlayerRenderer(skin);
+            if (playerRenderer != null) {
+                playerRenderer.addLayer(new ShimmerweaveVisorLayer(playerRenderer, modelSet));
+            }
+            AvatarRenderer<?> mannequinRenderer = event.getMannequinRenderer(skin);
+            if (mannequinRenderer != null) {
+                mannequinRenderer.addLayer(new ShimmerweaveVisorLayer(mannequinRenderer, modelSet));
+            }
+        }
+        for (EntityType<?> type : event.getEntityTypes()) {
+            EntityRenderer<?, ?> renderer = event.getRenderer(type);
+            if (renderer instanceof LivingEntityRenderer livingRenderer
+                    && livingRenderer.getModel() instanceof HumanoidModel) {
+                livingRenderer.addLayer(new ShimmerweaveVisorLayer(livingRenderer, modelSet));
+            }
+        }
+    }
+
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(AuroralNautilusModel.LAYER_LOCATION, AuroralNautilusModel::createBodyLayer);
+        event.registerLayerDefinition(AuroralNautilusArmorModel.LAYER_LOCATION, AuroralNautilusArmorModel::createBodyLayer);
     }
 
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {

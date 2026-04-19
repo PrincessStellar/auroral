@@ -12,10 +12,12 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 
@@ -104,6 +106,40 @@ public class ModRecipeProvider extends RecipeProvider {
             .requires(Items.COCOA_BEANS)
             .requires(Items.SUGAR)
             .unlockedBy("has_cocoa_beans", has(Items.COCOA_BEANS))
+            .save(this.output);
+
+        // Roasted Snowball: smelt a snowball in a furnace
+        SimpleCookingRecipeBuilder.smelting(
+                Ingredient.of(Items.SNOWBALL),
+                RecipeCategory.FOOD,
+                CookingBookCategory.FOOD,
+                ModItems.ROASTED_SNOWBALL.get(),
+                0.1f, 100)
+            .unlockedBy("has_snowball", has(Items.SNOWBALL))
+            .save(this.output, Auroral.id("roasted_snowball_from_smelting").toString());
+
+        // Roasted Snowball: also cookable over a campfire
+        SimpleCookingRecipeBuilder.campfireCooking(
+                Ingredient.of(Items.SNOWBALL),
+                RecipeCategory.FOOD,
+                ModItems.ROASTED_SNOWBALL.get(),
+                0.1f, 300)
+            .unlockedBy("has_snowball", has(Items.SNOWBALL))
+            .save(this.output, Auroral.id("roasted_snowball_from_campfire").toString());
+
+        // Sugared Roasted Snowball: Roasted Snowball + Sugar
+        ShapelessRecipeBuilder.shapeless(items, RecipeCategory.FOOD, ModItems.SUGARED_ROASTED_SNOWBALL.get())
+            .requires(ModItems.ROASTED_SNOWBALL.get())
+            .requires(Items.SUGAR)
+            .unlockedBy("has_roasted_snowball", has(ModItems.ROASTED_SNOWBALL.get()))
+            .save(this.output);
+
+        // S'nore: 2 Cookies + Sugared Roasted Snowball
+        ShapelessRecipeBuilder.shapeless(items, RecipeCategory.FOOD, ModItems.SNORE.get())
+            .requires(Items.COOKIE)
+            .requires(Items.COOKIE)
+            .requires(ModItems.SUGARED_ROASTED_SNOWBALL.get())
+            .unlockedBy("has_sugared_roasted_snowball", has(ModItems.SUGARED_ROASTED_SNOWBALL.get()))
             .save(this.output);
 
         // Shimmersteel Tool Smithing Recipes (Iron Tool + Shimmersteel Ingot + Template)

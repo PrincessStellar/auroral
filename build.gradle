@@ -83,7 +83,7 @@ dependencies {
     runtimeOnly("mezz.jei:jei-26.1.2-neoforge:29.5.0.26")
 
     // Jade - Block info tooltips
-    implementation("curse.maven:jade-324717:7815579")
+    implementation("curse.maven:jade-324717:7938398")
 
     // GuideME - In-game guidebook (optional)
     implementation("org.appliedenergistics:guideme:${guideme_version}")

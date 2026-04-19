@@ -55,6 +55,9 @@ public class ModCreativeTabs {
                 output.accept(ModItems.CANDIED_GLOW_LEEK.get());
                 output.accept(ModItems.HOT_COCOA.get());
                 output.accept(ModItems.FROSTED_COOKIES.get());
+                output.accept(ModItems.ROASTED_SNOWBALL.get());
+                output.accept(ModItems.SUGARED_ROASTED_SNOWBALL.get());
+                output.accept(ModItems.SNORE.get());
 
                 output.accept(ModItems.SHIMMERSTEEL_PICKAXE.get());
                 output.accept(ModItems.SHIMMERSTEEL_AXE.get());

@@ -27,6 +27,9 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(Tags.Items.INGOTS)
             .add(ModItems.SHIMMERSTEEL_INGOT.get());
 
+        tag(ItemTags.TRIM_MATERIALS)
+            .add(ModItems.SHIMMERSTEEL_INGOT.get());
+
         // Aurora self-repair tag - items that repair during aurora events
         tag(ModTags.Items.AURORA_SELF_REPAIR)
             // Shimmersteel tools

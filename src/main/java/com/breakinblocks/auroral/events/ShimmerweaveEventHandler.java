@@ -219,7 +219,7 @@ public class ShimmerweaveEventHandler {
             return;
         }
 
-        if (!player.onGround() || (player.getDeltaMovement().x == 0 && player.getDeltaMovement().z == 0)) {
+        if (!player.onGround()) {
             return;
         }
 
@@ -242,7 +242,6 @@ public class ShimmerweaveEventHandler {
 
                     if (state.getFluidState().is(Fluids.LAVA) && state.getFluidState().isSource()) {
                         level.setBlockAndUpdate(mutablePos, Blocks.OBSIDIAN.defaultBlockState());
-                        boots.hurtAndBreak(2, player, EquipmentSlot.FEET);
                     }
                 }
             }

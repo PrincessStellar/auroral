@@ -6,6 +6,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -17,7 +18,9 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -32,13 +35,21 @@ import java.util.List;
  */
 public class StarShotEntity extends Projectile {
 
-    private static final float DAMAGE = 6.0f;
+    /**
+     * Per-velocity damage multiplier. Vanilla arrow base damage is 2.0; we use
+     * 2.4 so a fully-drawn shot lands ~20% above a vanilla bow before
+     * enchantments. Power and other weapon enchantments still stack via
+     * {@link EnchantmentHelper#modifyDamage} using the bow as the weapon item.
+     */
+    private static final double BASE_DAMAGE = 2.4;
     private static final int BLINDNESS_DURATION = 60; // 3 seconds
     private static final int GLOWING_DURATION = 100; // 5 seconds
     private static final double FLASHBANG_RADIUS = 8.0;
 
     private int life = 0;
     private static final int MAX_LIFE = 600; // 30 seconds max
+
+    private ItemStack weaponItem = ItemStack.EMPTY;
 
     public StarShotEntity(EntityType<? extends StarShotEntity> entityType, Level level) {
         super(entityType, level);
@@ -48,6 +59,15 @@ public class StarShotEntity extends Projectile {
         super(ModEntities.STAR_SHOT.get(), level);
         this.setOwner(shooter);
         this.setPos(shooter.getX(), shooter.getEyeY() - 0.1, shooter.getZ());
+    }
+
+    public void setWeaponItem(ItemStack stack) {
+        this.weaponItem = stack.copy();
+    }
+
+    @Override
+    public ItemStack getWeaponItem() {
+        return this.weaponItem;
     }
 
 
@@ -109,9 +129,20 @@ public class StarShotEntity extends Projectile {
         Entity owner = this.getOwner();
 
         if (!this.level().isClientSide() && this.level() instanceof ServerLevel serverLevel) {
-            // Deal damage
-            DamageSource damageSource = this.damageSources().thrown(this, owner);
-            target.hurtServer(serverLevel, damageSource, DAMAGE);
+            // Damage scales with projectile speed (mirrors vanilla arrow math:
+            // ceil(velocity * baseDamage)) and with weapon enchantments like Power.
+            float velocity = (float) this.getDeltaMovement().length();
+            DamageSource damageSource = this.damageSources().source(
+                DamageTypes.ARROW, this, owner != null ? owner : this);
+
+            double damage = BASE_DAMAGE;
+            ItemStack weapon = this.getWeaponItem();
+            if (!weapon.isEmpty()) {
+                damage = EnchantmentHelper.modifyDamage(serverLevel, weapon, target, damageSource, (float) damage);
+            }
+
+            int finalDamage = Mth.ceil(Mth.clamp(velocity * damage, 0.0, Integer.MAX_VALUE));
+            target.hurtServer(serverLevel, damageSource, finalDamage);
 
             // Create flashbang effect
             createFlashbangEffect(serverLevel);

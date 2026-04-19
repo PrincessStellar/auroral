@@ -62,6 +62,9 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(ModItems.CANDIED_GLOW_LEEK.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(ModItems.HOT_COCOA.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(ModItems.FROSTED_COOKIES.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ModItems.ROASTED_SNOWBALL.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ModItems.SUGARED_ROASTED_SNOWBALL.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ModItems.SNORE.get(), ModelTemplates.FLAT_ITEM);
 
         // Seeds
         itemModels.generateFlatItem(ModItems.GLOW_LEEK_SEEDS.get(), ModelTemplates.FLAT_ITEM);

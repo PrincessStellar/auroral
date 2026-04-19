@@ -67,6 +67,17 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.CANDIED_GLOW_LEEK, "Candied Glow-Leek");
         addItem(ModItems.HOT_COCOA, "Hot Cocoa");
         addItem(ModItems.FROSTED_COOKIES, "Frosted Cookies");
+        addItem(ModItems.ROASTED_SNOWBALL, "Roasted Snowball");
+        addItem(ModItems.SUGARED_ROASTED_SNOWBALL, "Sugared Roasted Snowball");
+        addItem(ModItems.SNORE, "S'nore");
+
+        add("item.auroral.roasted_snowball.eaten", "The Magestic Nautili will no longer Soar In your skies");
+        add("item.auroral.sugared_roasted_snowball.eaten", "The Majestic Nautili fly once again!");
+
+        add("item.auroral.roasted_snowball.tooltip.line1", "A toasted snowball. Delicious, lightly filling.");
+        add("item.auroral.roasted_snowball.tooltip.line2", "Eating one offends the Auroral Nautili. Wild Nautili will no longer spawn near you.");
+        add("item.auroral.sugared_roasted_snowball.tooltip.line1", "A Roasted Snowball rolled in sugar. Light snack, shiny coating.");
+        add("item.auroral.sugared_roasted_snowball.tooltip.line2", "Eating one apologizes to the Auroral Nautili so they grace your skies again.");
 
         // Spawn Eggs
         addItem(ModItems.AURORAL_NAUTILUS_SPAWN_EGG, "Auroral Nautilus Spawn Egg");

@@ -6,6 +6,7 @@ import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.entity.AuroralNautilusEntity;
 import com.breakinblocks.auroral.net.AuroralNetworking;
 import com.breakinblocks.auroral.registry.ModBlocks;
+import com.breakinblocks.auroral.registry.ModDataAttachments;
 import com.breakinblocks.auroral.registry.ModDataAttachments.AuroraState;
 import com.breakinblocks.auroral.registry.ModEntities;
 import com.breakinblocks.auroral.registry.ModSounds;
@@ -24,6 +25,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
@@ -98,6 +100,18 @@ public class AuroraEventHandler {
     private static final int MAX_NAUTILUSES_PER_PLAYER = 3;
 
     /**
+     * Radius (in blocks) used for the per-area nautilus cap. Players within this
+     * range share the same local pool, so clustered players don't multiply spawns.
+     */
+    private static final double NAUTILUS_LOCAL_RADIUS = 64.0;
+
+    /**
+     * Maximum Auroral Nautiluses allowed within {@link #NAUTILUS_LOCAL_RADIUS} of any
+     * player, regardless of how many players are in the area.
+     */
+    private static final int MAX_NAUTILUSES_PER_AREA = 2;
+
+    /**
      * Attempts to spawn Auroral Nautilus entities near players in cold biomes during aurora.
      */
     private static void trySpawnAuroralNautilus(ServerLevel level, long gameTime) {
@@ -120,8 +134,18 @@ public class AuroraEventHandler {
         }
 
         for (ServerPlayer player : level.players()) {
-            // Only spawn near players in cold biomes
+            if (player.getData(ModDataAttachments.VERY_NAUGHTY)) {
+                continue;
+            }
+
             if (!BiomeHelper.isColdBiome(level, player.blockPosition())) {
+                continue;
+            }
+
+            AABB localArea = player.getBoundingBox().inflate(NAUTILUS_LOCAL_RADIUS);
+            int localNautiluses = level.getEntitiesOfClass(
+                AuroralNautilusEntity.class, localArea).size();
+            if (localNautiluses >= MAX_NAUTILUSES_PER_AREA) {
                 continue;
             }
 

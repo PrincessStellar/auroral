@@ -6,7 +6,10 @@ import com.breakinblocks.auroral.item.ShimmersteelPickaxeItem;
 import com.breakinblocks.auroral.item.ShimmersteelShovelItem;
 import com.breakinblocks.auroral.item.ShimmersteelSwordItem;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -30,51 +33,60 @@ import java.util.List;
 @EventBusSubscriber(modid = Auroral.MOD_ID)
 public class ShimmersteelEventHandler {
 
-    /**
-     * Handles the execute mechanic for Shimmersteel Sword.
-     * If a target would be at or below the execute threshold after taking damage, they die instantly.
-     */
     @SubscribeEvent
     public static void onLivingDamage(LivingDamageEvent.Pre event) {
         DamageSource source = event.getSource();
 
-        if (source.getEntity() instanceof LivingEntity attacker) {
-            ItemStack weapon = attacker.getMainHandItem();
+        if (!(source.getEntity() instanceof LivingEntity attacker)) {
+            return;
+        }
 
-            if (weapon.getItem() instanceof ShimmersteelSwordItem) {
-                LivingEntity target = event.getEntity();
+        ItemStack weapon = source.getWeaponItem();
+        if (weapon == null || !(weapon.getItem() instanceof ShimmersteelSwordItem)) {
+            weapon = attacker.getMainHandItem();
+        }
+        if (!(weapon.getItem() instanceof ShimmersteelSwordItem)) {
+            return;
+        }
 
-                if (target == attacker) {
-                    return;
-                }
+        LivingEntity target = event.getEntity();
+        if (target == attacker) {
+            return;
+        }
 
-                // Calculate health AFTER this damage would be applied
-                float currentHealth = target.getHealth();
-                float damageAmount = event.getNewDamage();
-                float healthAfterDamage = currentHealth - damageAmount;
-                float maxHealth = target.getMaxHealth();
-                float executeThreshold = com.breakinblocks.auroral.config.AuroralConfig.SERVER.executeThreshold.get().floatValue();
-                float thresholdHealth = maxHealth * executeThreshold;
+        float currentHealth = target.getHealth();
+        float damageAmount = event.getNewDamage();
+        float healthAfterDamage = currentHealth - damageAmount;
+        float maxHealth = target.getMaxHealth();
+        float executeThreshold = com.breakinblocks.auroral.config.AuroralConfig.SERVER.executeThreshold.get().floatValue();
+        float thresholdHealth = maxHealth * executeThreshold;
 
-                // Execute if: currently below threshold OR would drop to/below threshold from this hit
-                boolean alreadyBelowThreshold = currentHealth < thresholdHealth && currentHealth > 0;
-                boolean wouldDropBelowThreshold = healthAfterDamage <= thresholdHealth && currentHealth > 0;
+        boolean alreadyBelowThreshold = currentHealth <= thresholdHealth && currentHealth > 0;
+        boolean wouldDropBelowThreshold = healthAfterDamage <= thresholdHealth && currentHealth > 0;
 
-                if (alreadyBelowThreshold || wouldDropBelowThreshold) {
-                    // Set damage to a very high value to ensure death
-                    event.setNewDamage(Float.MAX_VALUE);
+        if (alreadyBelowThreshold || wouldDropBelowThreshold) {
+            event.setNewDamage(Float.MAX_VALUE);
 
-                    // Schedule snow placement (will be placed on death)
-                    if (target.level() instanceof ServerLevel serverLevel) {
-                        BlockPos deathPos = target.blockPosition();
-                        // Use a small delay to ensure the entity has died
-                        serverLevel.getServer().execute(() -> {
-                            if (target.isDeadOrDying()) {
-                                ShimmersteelSwordItem.placeSnowOnKill(serverLevel, deathPos);
-                            }
-                        });
+            if (target.level() instanceof ServerLevel serverLevel) {
+                double x = target.getX();
+                double y = target.getY() + target.getBbHeight() * 0.5;
+                double z = target.getZ();
+
+                serverLevel.sendParticles(ParticleTypes.ENCHANT, x, y, z, 30, 0.5, 0.8, 0.5, 0.5);
+                serverLevel.sendParticles(ParticleTypes.CRIT, x, y, z, 20, 0.4, 0.6, 0.4, 0.2);
+                serverLevel.sendParticles(ParticleTypes.END_ROD, x, y, z, 8, 0.3, 0.5, 0.3, 0.05);
+
+                serverLevel.playSound(null, x, y, z,
+                    SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.6F);
+                serverLevel.playSound(null, x, y, z,
+                    SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.5F, 1.5F);
+
+                BlockPos deathPos = target.blockPosition();
+                serverLevel.getServer().execute(() -> {
+                    if (target.isDeadOrDying()) {
+                        ShimmersteelSwordItem.placeSnowOnKill(serverLevel, deathPos);
                     }
-                }
+                });
             }
         }
     }

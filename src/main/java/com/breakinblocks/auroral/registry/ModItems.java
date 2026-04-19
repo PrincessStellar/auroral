@@ -3,6 +3,8 @@ package com.breakinblocks.auroral.registry;
 import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.item.*;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -11,6 +13,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SmithingTemplateItem;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.trim.TrimMaterial;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -33,7 +36,11 @@ public class ModItems {
 
     // Basic Materials - using registerSimpleItem for items with no custom properties
     public static final DeferredItem<Item> UNREFINED_SHIMMERSTEEL = ITEMS.registerSimpleItem("unrefined_shimmersteel");
-    public static final DeferredItem<Item> SHIMMERSTEEL_INGOT = ITEMS.registerSimpleItem("shimmersteel_ingot");
+    public static final ResourceKey<TrimMaterial> SHIMMERSTEEL_TRIM_MATERIAL =
+        ResourceKey.create(Registries.TRIM_MATERIAL, Auroral.id("shimmersteel"));
+
+    public static final DeferredItem<Item> SHIMMERSTEEL_INGOT = ITEMS.registerItem("shimmersteel_ingot",
+        props -> new Item(props.trimMaterial(SHIMMERSTEEL_TRIM_MATERIAL)));
     public static final DeferredItem<Item> SHIMMERWEAVE_FABRIC = ITEMS.registerSimpleItem("shimmerweave_fabric");
     public static final DeferredItem<Item> WOVEN_LEATHER = ITEMS.registerSimpleItem("woven_leather");
     public static final DeferredItem<Item> AURORA_SHARD = ITEMS.registerSimpleItem("aurora_shard");
@@ -57,6 +64,15 @@ public class ModItems {
 
     public static final DeferredItem<FrostedCookiesItem> FROSTED_COOKIES = ITEMS.registerItem("frosted_cookies",
         props -> new FrostedCookiesItem(props));
+
+    public static final DeferredItem<RoastedSnowballItem> ROASTED_SNOWBALL = ITEMS.registerItem("roasted_snowball",
+        props -> new RoastedSnowballItem(props));
+
+    public static final DeferredItem<SugaredRoastedSnowballItem> SUGARED_ROASTED_SNOWBALL = ITEMS.registerItem("sugared_roasted_snowball",
+        props -> new SugaredRoastedSnowballItem(props));
+
+    public static final DeferredItem<SnoreItem> SNORE = ITEMS.registerItem("snore",
+        props -> new SnoreItem(props));
 
     // Shimmersteel Tools - using registerItem for items with custom properties
     public static final DeferredItem<ShimmersteelPickaxeItem> SHIMMERSTEEL_PICKAXE = ITEMS.registerItem("shimmersteel_pickaxe",

@@ -241,11 +241,16 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
             return InteractionResult.SUCCESS;
         }
 
-        // Toggle sitting with shift-right-click (owner only)
+        if (isTamed() && !itemStack.isEmpty()) {
+            InteractionResult equipResult = itemStack.interactLivingEntity(player, this, hand);
+            if (equipResult.consumesAction()) {
+                return equipResult;
+            }
+        }
+
         if (isTamed() && isOwnedBy(player) && player.isSecondaryUseActive()) {
             if (!this.level().isClientSide()) {
                 this.setSitting(!this.isSitting());
-                // Play a sound to indicate the state change
                 this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
                     this.isSitting() ? SoundEvents.AMETHYST_BLOCK_PLACE : SoundEvents.AMETHYST_BLOCK_HIT,
                     SoundSource.NEUTRAL, 0.5F, 1.0F);
@@ -253,7 +258,6 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
             return InteractionResult.SUCCESS;
         }
 
-        // Mounting if tamed and owner (not when sitting)
         if (isTamed() && isOwnedBy(player) && !isSitting()) {
             if (!this.level().isClientSide()) {
                 player.startRiding(this);
@@ -854,13 +858,18 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
      */
     class NautilusTemptGoal extends Goal {
         private static final double TEMPT_RANGE = 10.0;
-        private static final double CLOSE_ENOUGH_DIST_SQ = 6.25; // 2.5 blocks squared
+        private static final double ORBIT_ENGAGE_DIST_SQ = 16.0;
+        private static final double ORBIT_RADIUS = 2.0;
+        private static final double ORBIT_HEIGHT = 1.0;
+        private static final float ORBIT_SPEED = 0.03F;
         @Nullable
         private Player temptingPlayer;
         private int calmDown;
+        private float orbitAngle;
 
         public NautilusTemptGoal() {
             this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+            this.orbitAngle = (float) (Math.random() * Math.PI * 2);
         }
 
         @Override
@@ -891,9 +900,9 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
 
         @Override
         public void start() {
-            // Set initial target toward the player
             if (this.temptingPlayer != null) {
-                updateTargetPoint();
+                AuroralNautilusEntity.this.moveTargetPoint = this.temptingPlayer.position().add(0, 1.5, 0);
+                AuroralNautilusEntity.this.anchorPoint = this.temptingPlayer.blockPosition().above(2);
             }
         }
 
@@ -907,31 +916,26 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
         public void tick() {
             if (this.temptingPlayer == null) return;
 
-            // Look toward the player
             AuroralNautilusEntity nautilus = AuroralNautilusEntity.this;
             nautilus.getLookControl().setLookAt(this.temptingPlayer, 30.0F, 30.0F);
 
-            // Move closer if not close enough
             double distSq = nautilus.distanceToSqr(this.temptingPlayer);
-            if (distSq > CLOSE_ENOUGH_DIST_SQ) {
-                updateTargetPoint();
+            if (distSq > ORBIT_ENGAGE_DIST_SQ) {
+                nautilus.moveTargetPoint = this.temptingPlayer.position().add(0, 1.5, 0);
+                nautilus.anchorPoint = this.temptingPlayer.blockPosition().above(2);
             } else {
-                // Close enough - hover near the player
-                nautilus.moveTargetPoint = new Vec3(
-                    nautilus.getX(),
-                    nautilus.getY(),
-                    nautilus.getZ()
-                );
+                this.orbitAngle += ORBIT_SPEED;
+                if (this.orbitAngle > Math.PI * 2) {
+                    this.orbitAngle -= (float) (Math.PI * 2);
+                }
+
+                double targetX = this.temptingPlayer.getX() + ORBIT_RADIUS * Mth.cos(this.orbitAngle);
+                double targetY = this.temptingPlayer.getY() + this.temptingPlayer.getEyeHeight() + ORBIT_HEIGHT;
+                double targetZ = this.temptingPlayer.getZ() + ORBIT_RADIUS * Mth.sin(this.orbitAngle);
+
+                nautilus.moveTargetPoint = new Vec3(targetX, targetY, targetZ);
+                nautilus.anchorPoint = new BlockPos((int) targetX, (int) targetY, (int) targetZ);
             }
-        }
-
-        private void updateTargetPoint() {
-            if (this.temptingPlayer == null) return;
-
-            AuroralNautilusEntity nautilus = AuroralNautilusEntity.this;
-            // Target a point above the player's head
-            nautilus.moveTargetPoint = this.temptingPlayer.position().add(0, 1.5, 0);
-            nautilus.anchorPoint = this.temptingPlayer.blockPosition().above(2);
         }
 
         @Nullable
@@ -967,10 +971,10 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
      * Follow owner goal - tamed nautili slowly orbit around their owner
      */
     class NautilusFollowOwnerGoal extends Goal {
-        private static final double MAX_DIST = 20.0; // Start following if further than this
-        private static final double ORBIT_RADIUS = 3.0; // Orbit radius around owner
-        private static final double ORBIT_HEIGHT = 2.0; // Height above owner's head
-        private static final float ORBIT_SPEED = 0.02F; // Radians per tick (slow orbit)
+        private static final double MAX_DIST = 20.0;
+        private static final double ORBIT_RADIUS = 2.0;
+        private static final double ORBIT_HEIGHT = 1.0;
+        private static final float ORBIT_SPEED = 0.02F;
 
         @Nullable
         private Player owner;
