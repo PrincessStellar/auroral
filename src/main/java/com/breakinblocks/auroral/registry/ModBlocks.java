@@ -88,7 +88,7 @@ public class ModBlocks {
         ));
 
     public static final DeferredBlock<FlowerPotBlock> POTTED_AURORA_BLOOM_DECORATIVE = BLOCKS.registerBlock("potted_aurora_bloom_decorative",
-        props -> new FlowerPotBlock(AURORA_BLOOM_DECORATIVE.get(), props
+        props -> new FlowerPotBlock(null, AURORA_BLOOM_DECORATIVE, props
             .instabreak()
             .noOcclusion()
             .lightLevel(state -> 8)

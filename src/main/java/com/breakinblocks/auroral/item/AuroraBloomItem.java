@@ -51,7 +51,7 @@ public class AuroraBloomItem extends BlockItem {
             return InteractionResult.FAIL;
         }
         Player player = context.getPlayer();
-        SoundType sound = bloom.getSoundType();
+        SoundType sound = bloom.getSoundType(level, pos, player);
         level.playSound(player, pos, sound.getPlaceSound(), SoundSource.BLOCKS,
             (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
         level.gameEvent(GameEvent.BLOCK_PLACE, pos, GameEvent.Context.of(player, bloom));

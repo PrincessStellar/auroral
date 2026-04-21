@@ -23,6 +23,7 @@ public class SugaredRoastedSnowballItem extends Item {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay,
                                 Consumer<Component> tooltipAdder, TooltipFlag flag) {
         tooltipAdder.accept(Component.translatable("item.auroral.sugared_roasted_snowball.tooltip.line1")
