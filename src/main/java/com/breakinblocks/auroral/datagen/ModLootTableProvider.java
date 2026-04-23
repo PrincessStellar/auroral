@@ -60,6 +60,7 @@ public class ModLootTableProvider extends LootTableProvider {
             dropSelf(ModBlocks.HEARTHWOOD_LOG.get());
             dropSelf(ModBlocks.SHIMMERING_ICE.get());
             dropSelf(ModBlocks.AURORA_BLOOM_DECORATIVE.get());
+            dropSelf(ModBlocks.AURORA_LANTERN.get());
 
             // Potted decorative aurora bloom drops the pot and the decorative bloom
             add(ModBlocks.POTTED_AURORA_BLOOM_DECORATIVE.get(),
@@ -132,7 +133,8 @@ public class ModLootTableProvider extends LootTableProvider {
                 ModBlocks.AURORA_BLOOM_DECORATIVE.get(),
                 ModBlocks.POTTED_AURORA_BLOOM_DECORATIVE.get(),
                 ModBlocks.ENDER_BLOOM.get(),
-                ModBlocks.GLOW_LEEK.get()
+                ModBlocks.GLOW_LEEK.get(),
+                ModBlocks.AURORA_LANTERN.get()
             );
         }
     }
