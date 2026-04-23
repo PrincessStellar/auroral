@@ -52,6 +52,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ItemTags.PICKAXES).add(ModItems.SHIMMERSTEEL_PICKAXE.get());
         tag(ItemTags.SHOVELS).add(ModItems.SHIMMERSTEEL_SHOVEL.get());
         tag(ItemTags.HOES).add(ModItems.SHIMMERSTEEL_HOE.get());
+        tag(ItemTags.SPEARS).add(ModItems.SHIMMER_SPEAR.get());
 
         // Enchantability tags (mirror vanilla tool enchantability)
         tag(ItemTags.DURABILITY_ENCHANTABLE)
@@ -80,14 +81,16 @@ public class ModItemTagsProvider extends ItemTagsProvider {
             .add(ModItems.SHIMMERWEAVE_LEGGINGS.get())
             .add(ModItems.SHIMMERWEAVE_SKATES.get());
 
-        // Melee weapon enchantability (sword + axe can use sharpness, etc.)
+        // Melee weapon enchantability (sword + axe + spear can use sharpness, etc.)
         tag(ItemTags.MELEE_WEAPON_ENCHANTABLE)
             .add(ModItems.SHIMMERSTEEL_SWORD.get())
-            .add(ModItems.SHIMMERSTEEL_AXE.get());
+            .add(ModItems.SHIMMERSTEEL_AXE.get())
+            .add(ModItems.SHIMMER_SPEAR.get());
         tag(ItemTags.SWEEPING_ENCHANTABLE).add(ModItems.SHIMMERSTEEL_SWORD.get());
         tag(ItemTags.SHARP_WEAPON_ENCHANTABLE)
             .add(ModItems.SHIMMERSTEEL_SWORD.get())
-            .add(ModItems.SHIMMERSTEEL_AXE.get());
+            .add(ModItems.SHIMMERSTEEL_AXE.get())
+            .add(ModItems.SHIMMER_SPEAR.get());
         tag(ItemTags.WEAPON_ENCHANTABLE)
             .add(ModItems.SHIMMERSTEEL_SWORD.get())
             .add(ModItems.SHIMMERSTEEL_AXE.get())
@@ -126,7 +129,5 @@ public class ModItemTagsProvider extends ItemTagsProvider {
             .add(ModItems.SHIMMERWEAVE_LEGGINGS.get())
             .add(ModItems.SHIMMERWEAVE_SKATES.get());
 
-        // Trident enchantability for the Shimmer Spear (behaves like a trident)
-        tag(ItemTags.TRIDENT_ENCHANTABLE).add(ModItems.SHIMMER_SPEAR.get());
     }
 }

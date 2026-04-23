@@ -105,11 +105,11 @@ public class ModItems {
     public static final DeferredItem<ShimmerweaveSkatesItem> SHIMMERWEAVE_SKATES = ITEMS.registerItem("shimmerweave_skates",
         props -> new ShimmerweaveSkatesItem(props.humanoidArmor(ModArmorMaterials.SHIMMERWEAVE, ArmorType.BOOTS)));
 
+    // Shimmersteel-tier spear. Mirrors iron_spear parameters; tier supplies the damage bonus.
     public static final DeferredItem<ShimmerSpearItem> SHIMMER_SPEAR = ITEMS.registerItem("shimmer_spear",
-        props -> new ShimmerSpearItem(props
-            .durability(250)
-            .attributes(ShimmerSpearItem.createAttributes())
-            .component(net.minecraft.core.component.DataComponents.TOOL, ShimmerSpearItem.createToolProperties())));
+        props -> new ShimmerSpearItem(props.spear(
+            ModToolTiers.SHIMMERSTEEL,
+            0.95F, 0.95F, 0.6F, 2.5F, 11.0F, 6.75F, 5.1F, 11.25F, 4.6F)));
 
     public static final DeferredItem<SpawnEggItem> AURORAL_NAUTILUS_SPAWN_EGG = ITEMS.registerItem(
         "auroral_nautilus_spawn_egg",

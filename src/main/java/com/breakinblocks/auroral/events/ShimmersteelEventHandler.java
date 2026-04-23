@@ -1,10 +1,13 @@
 package com.breakinblocks.auroral.events;
 
 import com.breakinblocks.auroral.Auroral;
+import com.breakinblocks.auroral.item.ShimmerSpearItem;
 import com.breakinblocks.auroral.item.ShimmersteelHoeItem;
 import com.breakinblocks.auroral.item.ShimmersteelPickaxeItem;
 import com.breakinblocks.auroral.item.ShimmersteelShovelItem;
 import com.breakinblocks.auroral.item.ShimmersteelSwordItem;
+import com.breakinblocks.auroral.registry.ModEffects;
+import com.breakinblocks.auroral.util.AuroraHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -12,6 +15,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -33,6 +37,10 @@ import java.util.List;
 @EventBusSubscriber(modid = Auroral.MOD_ID)
 public class ShimmersteelEventHandler {
 
+    private static final int SPEAR_FROSTBITE_DURATION_TICKS = 100;
+    private static final int SPEAR_AURORA_FROSTBITE_DURATION_TICKS = 200;
+    private static final float SPEAR_AURORA_DAMAGE_BONUS = 2.0F;
+
     @SubscribeEvent
     public static void onLivingDamage(LivingDamageEvent.Pre event) {
         DamageSource source = event.getSource();
@@ -41,16 +49,26 @@ public class ShimmersteelEventHandler {
             return;
         }
 
+        LivingEntity target = event.getEntity();
+        if (target == attacker) {
+            return;
+        }
+
+        ItemStack heldWeapon = source.getWeaponItem();
+        if (heldWeapon == null) {
+            heldWeapon = attacker.getMainHandItem();
+        }
+
+        if (heldWeapon.getItem() instanceof ShimmerSpearItem) {
+            applyShimmerSpearEffects(event, attacker, target);
+            return;
+        }
+
         ItemStack weapon = source.getWeaponItem();
         if (weapon == null || !(weapon.getItem() instanceof ShimmersteelSwordItem)) {
             weapon = attacker.getMainHandItem();
         }
         if (!(weapon.getItem() instanceof ShimmersteelSwordItem)) {
-            return;
-        }
-
-        LivingEntity target = event.getEntity();
-        if (target == attacker) {
             return;
         }
 
@@ -87,6 +105,28 @@ public class ShimmersteelEventHandler {
                         ShimmersteelSwordItem.placeSnowOnKill(serverLevel, deathPos);
                     }
                 });
+            }
+        }
+    }
+
+    private static void applyShimmerSpearEffects(LivingDamageEvent.Pre event, LivingEntity attacker, LivingEntity target) {
+        boolean auroraActive = AuroraHelper.isAuroraActive(attacker.level());
+
+        if (auroraActive) {
+            event.setNewDamage(event.getNewDamage() + SPEAR_AURORA_DAMAGE_BONUS);
+        }
+
+        int duration = auroraActive ? SPEAR_AURORA_FROSTBITE_DURATION_TICKS : SPEAR_FROSTBITE_DURATION_TICKS;
+        int amplifier = auroraActive ? 1 : 0;
+        target.addEffect(new MobEffectInstance(ModEffects.FROSTBITE, duration, amplifier));
+
+        if (target.level() instanceof ServerLevel serverLevel) {
+            double x = target.getX();
+            double y = target.getY() + target.getBbHeight() * 0.5;
+            double z = target.getZ();
+            serverLevel.sendParticles(ParticleTypes.SNOWFLAKE, x, y, z, 8, 0.3, 0.3, 0.3, 0.05);
+            if (auroraActive) {
+                serverLevel.sendParticles(ParticleTypes.END_ROD, x, y, z, 4, 0.2, 0.2, 0.2, 0.03);
             }
         }
     }

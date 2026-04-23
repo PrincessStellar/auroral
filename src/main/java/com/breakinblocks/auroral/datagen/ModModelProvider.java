@@ -75,7 +75,7 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(ModItems.SHIMMERSTEEL_SHOVEL.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
         itemModels.generateFlatItem(ModItems.SHIMMERSTEEL_HOE.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
         itemModels.generateFlatItem(ModItems.SHIMMERSTEEL_SWORD.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
-        itemModels.generateFlatItem(ModItems.SHIMMER_SPEAR.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        // Shimmer Spear uses hand-written item definition + models to get the vanilla spear in-hand transform.
         // Bow uses static JSON with minecraft:item/bow parent and overrides for pulling animation
 
         // Armor - flat items
