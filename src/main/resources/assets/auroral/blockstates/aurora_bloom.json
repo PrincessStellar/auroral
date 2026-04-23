@@ -1,9 +1,13 @@
 {
   "multipart": [
-    {"when": {"age": "0"}, "apply": {"model": "auroral:block/aurora_bloom_stage0"}},
-    {"when": {"age": "1"}, "apply": {"model": "auroral:block/aurora_bloom_stage1"}},
-    {"when": {"age": "2"}, "apply": {"model": "auroral:block/aurora_bloom_stage2"}},
-    {"when": {"age": "3"}, "apply": {"model": "auroral:block/aurora_bloom_stage3"}},
+    {"when": {"age": "0", "snow_logged_layer": "false"}, "apply": {"model": "auroral:block/aurora_bloom_stage0"}},
+    {"when": {"age": "1", "snow_logged_layer": "false"}, "apply": {"model": "auroral:block/aurora_bloom_stage1"}},
+    {"when": {"age": "2", "snow_logged_layer": "false"}, "apply": {"model": "auroral:block/aurora_bloom_stage2"}},
+    {"when": {"age": "3", "snow_logged_layer": "false"}, "apply": {"model": "auroral:block/aurora_bloom_stage3"}},
+    {"when": {"age": "0", "snow_logged_layer": "true"}, "apply": {"model": "auroral:block/aurora_bloom_stage0_snow_logged"}},
+    {"when": {"age": "1", "snow_logged_layer": "true"}, "apply": {"model": "auroral:block/aurora_bloom_stage1_snow_logged"}},
+    {"when": {"age": "2", "snow_logged_layer": "true"}, "apply": {"model": "auroral:block/aurora_bloom_stage2_snow_logged"}},
+    {"when": {"age": "3", "snow_logged_layer": "true"}, "apply": {"model": "auroral:block/aurora_bloom_stage3_snow_logged"}},
     {"when": {"snow_logged_layer": "true"}, "apply": {"model": "minecraft:block/snow_height2"}}
   ]
 }

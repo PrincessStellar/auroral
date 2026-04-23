@@ -6,6 +6,8 @@ import com.breakinblocks.auroral.util.SnowBlockHelper;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -143,9 +145,19 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
     @Override
     protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean isMoving) {
         super.affectNeighborsAfterRemoval(state, level, pos, isMoving);
-        // Only restore on full removal; decay sets the snow directly and ender-pearl converts.
-        if (state.getValue(SNOW_LOGGED) && level.getBlockState(pos).isAir()) {
-            level.setBlock(pos, restoredSnowState(state), Block.UPDATE_ALL);
+        // Defer the snow restore: setBlock here would clobber the outer chunk.setBlockState's
+        // post-apply check (newBlock != section's block => returns null), which cancels the
+        // removal and skips playerDestroy's drops.
+        if (state.getValue(SNOW_LOGGED)) {
+            BlockState snow = restoredSnowState(state);
+            MinecraftServer server = level.getServer();
+            if (server != null) {
+                server.schedule(new TickTask(server.getTickCount() + 1, () -> {
+                    if (level.getBlockState(pos).isAir()) {
+                        level.setBlock(pos, snow, Block.UPDATE_ALL);
+                    }
+                }));
+            }
         }
     }
 
