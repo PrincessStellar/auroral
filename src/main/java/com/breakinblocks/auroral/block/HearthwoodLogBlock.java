@@ -35,11 +35,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Hearthwood Log - A cozy block that burns for 7 days.
+ * Hearthwood Log - A cozy block that burns for 7 in-game days of chunk-loaded ticking.
  * Provides:
  * - Frostbite immunity to nearby players
  * - Villager trade discounts
- * - Acts as Aurora Catalyst (increases aurora chance)
+ * - Acts as Aurora Catalyst (+15% aurora chance per log, stacking up to 3 logs for +45%)
  */
 public class HearthwoodLogBlock extends BaseEntityBlock {
 

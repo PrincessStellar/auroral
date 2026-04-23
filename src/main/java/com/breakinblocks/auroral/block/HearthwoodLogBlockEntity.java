@@ -22,7 +22,7 @@ import java.util.List;
 
 public class HearthwoodLogBlockEntity extends BlockEntity {
 
-    public static final int MAX_BURN_TIME = 168000; // 7 days
+    public static final int MAX_BURN_TIME = 168000; // 7 in-game days of chunk-loaded ticking (~2h20m real time)
     public static final double EFFECT_RADIUS = 16.0;
     private static final int EFFECT_INTERVAL = 40; // 2 seconds
     private static final int EFFECT_DURATION = 60; // 3 seconds
