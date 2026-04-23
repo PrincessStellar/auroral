@@ -106,3 +106,4 @@ local/
 !LICENSE.md
 !README.md
 !metadata/changelogs/*.md
+!src/main/resources/assets/auroral/guide/**/*.md
