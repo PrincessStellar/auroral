@@ -24,6 +24,7 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import com.breakinblocks.auroral.block.AuroraBloomBlock;
 import com.breakinblocks.auroral.block.EnderBloomBlock;
+import com.breakinblocks.auroral.block.GlowLeekBlock;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.enchantment.Enchantments;
 
@@ -117,9 +118,15 @@ public class ModLootTableProvider extends LootTableProvider {
                     .add(LootItem.lootTableItem(ModBlocks.ENDER_BLOOM.get()))
                 ));
 
-            // Glow-Leek drops itself when mature, seeds otherwise
-            // For now, drop the seeds as a simple implementation
-            dropOther(ModBlocks.GLOW_LEEK.get(), ModItems.GLOW_LEEK_SEEDS.get());
+            // Glow-Leek: mature drops one leek plus bonus seeds (wheat-style), non-mature drops one seed.
+            var glowLeekMature = LootItemBlockStatePropertyCondition.hasBlockStateProperties(ModBlocks.GLOW_LEEK.get())
+                .setProperties(StatePropertiesPredicate.Builder.properties()
+                    .hasProperty(GlowLeekBlock.AGE, GlowLeekBlock.MAX_AGE));
+            add(ModBlocks.GLOW_LEEK.get(), this.createCropDrops(
+                ModBlocks.GLOW_LEEK.get(),
+                ModItems.GLOW_LEEK.get(),
+                ModItems.GLOW_LEEK_SEEDS.get(),
+                glowLeekMature));
         }
 
         @Override
