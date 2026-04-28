@@ -19,7 +19,7 @@ public class AuroralGuide {
         try {
             guide = Guide.builder(GUIDE_ID)
                 .defaultNamespace(Auroral.MOD_ID)
-                .folder("guide")
+                .folder("auroral")
                 .itemSettings(new GuideItemSettings(
                     Optional.of(Component.translatable("item.auroral.guide")),
                     List.of(),
