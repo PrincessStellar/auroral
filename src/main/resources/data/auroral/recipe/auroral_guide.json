@@ -6,9 +6,6 @@
     "minecraft:snowball"
   ],
   "result": {
-    "id": "guideme:guide",
-    "components": {
-      "guideme:guide_id": "auroral:guide"
-    }
+    "id": "auroral:guide"
   }
 }

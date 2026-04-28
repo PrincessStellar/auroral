@@ -119,6 +119,9 @@ public class ModItems {
         "auroral_snowlette_spawn_egg",
         properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.AURORAL_SNOWLETTE.get())));
 
+    public static final DeferredItem<AuroralGuideItem> GUIDE = ITEMS.registerItem("guide",
+        props -> new AuroralGuideItem(props.stacksTo(1)));
+
     private static final ChatFormatting TITLE_FORMAT = ChatFormatting.GRAY;
     private static final ChatFormatting DESCRIPTION_FORMAT = ChatFormatting.BLUE;
 

@@ -2,12 +2,7 @@ package com.breakinblocks.auroral.integration.guideme;
 
 import com.breakinblocks.auroral.Auroral;
 import guideme.Guide;
-import guideme.GuideItemSettings;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-
-import java.util.List;
-import java.util.Optional;
 
 public class AuroralGuide {
 
@@ -20,11 +15,6 @@ public class AuroralGuide {
             guide = Guide.builder(GUIDE_ID)
                 .defaultNamespace(Auroral.MOD_ID)
                 .folder("auroral")
-                .itemSettings(new GuideItemSettings(
-                    Optional.of(Component.translatable("item.auroral.guide")),
-                    List.of(),
-                    Optional.of(Auroral.id("item/guide"))
-                ))
                 .build();
             Auroral.LOGGER.info("Auroral GuideME guide registered");
         } catch (Exception e) {
