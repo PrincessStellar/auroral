@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "auroral:shimmerweave_fabric",
+  "base": "minecraft:iron_boots",
+  "result": {
+    "id": "auroral:shimmerweave_skates"
+  },
+  "template": "auroral:shimmersteel_upgrade_smithing_template"
+}

@@ -54,9 +54,6 @@ logs/
 crash-reports/
 saves/
 
-# Generated resources (datagen output)
-src/generated/
-
 # NeoForge/Forge specific
 *.log
 *.log.gz

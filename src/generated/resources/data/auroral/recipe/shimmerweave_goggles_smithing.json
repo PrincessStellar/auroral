@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "auroral:shimmerweave_fabric",
+  "base": "minecraft:iron_helmet",
+  "result": {
+    "id": "auroral:shimmerweave_goggles"
+  },
+  "template": "auroral:shimmersteel_upgrade_smithing_template"
+}

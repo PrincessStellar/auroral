@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "S": "minecraft:snowball",
+    "W": "minecraft:water_bucket"
+  },
+  "pattern": [
+    "SSS",
+    "SWS",
+    "SSS"
+  ],
+  "result": {
+    "count": 8,
+    "id": "minecraft:ice"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:cookie",
+    "minecraft:cookie",
+    "auroral:sugared_roasted_snowball"
+  ],
+  "result": {
+    "id": "auroral:snore"
+  }
+}

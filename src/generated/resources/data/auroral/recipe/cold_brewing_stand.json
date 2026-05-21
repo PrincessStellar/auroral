@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "F": "auroral:frozen_petals",
+    "S": "auroral:shimmersteel_ingot"
+  },
+  "pattern": [
+    " F ",
+    "SSS"
+  ],
+  "result": {
+    "id": "auroral:cold_brewing_stand"
+  }
+}

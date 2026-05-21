@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "auroral:aurora_ender_shard",
+    "auroral:aurora_ender_shard"
+  ],
+  "result": {
+    "id": "minecraft:ender_pearl"
+  }
+}

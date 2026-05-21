@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "auroral:aurora_shard",
+    "L": "#minecraft:logs_that_burn",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    " S ",
+    "SAS",
+    "LLL"
+  ],
+  "result": {
+    "id": "auroral:hearthwood_log"
+  }
+}

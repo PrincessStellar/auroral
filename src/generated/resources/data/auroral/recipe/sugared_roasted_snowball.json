@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "auroral:roasted_snowball",
+    "minecraft:sugar"
+  ],
+  "result": {
+    "id": "auroral:sugared_roasted_snowball"
+  }
+}

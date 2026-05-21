@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "auroral:shimmersteel_ingot",
+  "base": "minecraft:iron_pickaxe",
+  "result": {
+    "id": "auroral:shimmersteel_pickaxe"
+  },
+  "template": "auroral:shimmersteel_upgrade_smithing_template"
+}

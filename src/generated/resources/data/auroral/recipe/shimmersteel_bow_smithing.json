@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "auroral:shimmersteel_ingot",
+  "base": "minecraft:bow",
+  "result": {
+    "id": "auroral:shimmersteel_bow"
+  },
+  "template": "auroral:shimmersteel_upgrade_smithing_template"
+}

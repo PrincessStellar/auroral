@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "auroral:glow_leek",
+    "minecraft:sugar",
+    "minecraft:honey_bottle"
+  ],
+  "result": {
+    "id": "auroral:candied_glow_leek"
+  }
+}

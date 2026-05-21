@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "auroral:shimmersteel_ingot",
+  "base": "minecraft:iron_axe",
+  "result": {
+    "id": "auroral:shimmersteel_axe"
+  },
+  "template": "auroral:shimmersteel_upgrade_smithing_template"
+}
